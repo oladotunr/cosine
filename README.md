@@ -1,2 +1,2 @@
 # cosine
-A BlockEx exchange trading-ready algo framework
+An open source exchange trading-ready algo framework
