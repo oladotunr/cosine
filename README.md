@@ -1,2 +1,3 @@
-# cosine
-An open source exchange trading-ready algo framework
+# Cosine
+A modular open source cryptocurrency trading algo framework.
+
