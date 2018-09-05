@@ -1,0 +1,4 @@
+Strategies
+==========
+
+.. contents:: :local:

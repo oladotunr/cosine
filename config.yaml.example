@@ -1,0 +1,44 @@
+system:
+    EventLoop: feed
+    EventLoopThrottle: 0.16 # secs
+
+orders:
+    ActiveDepth: 10
+
+venues:
+    bem:
+        Username: BEMUser123
+        Password: BEMUserPWD123!
+        APIDomain: dd
+        APIID: asdsdvsv
+        ConnectSignalR: true
+
+instruments:
+- "DAXT/EUR"
+
+feeds:
+    cryptocompare:
+        type: stream
+        endpoint: https://streamer.cryptocompare.com/
+        framework: socket.io
+        instruments:
+        - "DAXT/EUR"
+feed:
+    Primary: cryptocompare
+
+pricers:
+    Default: nullpricer
+    settings:
+        nullpricer:
+            nop: nop
+
+strategy:
+    type: noddy_floater
+    settings:
+        noddy_floater:
+            Spread: 0.20
+            MaxSpread: 0.5
+            instrument_settings:
+                "DAXT/EUR":
+                    MinVol: 5
+                    MaxVol: 10

@@ -1,0 +1,4 @@
+Algo
+====
+
+.. contents:: :local:
