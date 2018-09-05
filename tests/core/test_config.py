@@ -8,7 +8,7 @@ __author__ = 'dotun rominiyi'
 # IMPORTS
 from unittest import TestCase
 from io import StringIO
-from core.config import Config
+from cosine.core.config import Config
 
 
 # MODULE CLASSES

@@ -12,9 +12,9 @@ from base64 import b64decode
 from zlib import decompress, MAX_WBITS
 from signalr_aio import Connection as SignalRConnection
 
-from core.proc_workers import CosineProcWorkers
-from venues.base_venue import AsyncEvents
-from venues.bem.types import (
+from cosine.core.proc_workers import CosineProcWorkers
+from cosine.venues.base_venue import AsyncEvents
+from cosine.venues.bem.types import (
     BlockExMarketsAsyncOrder,
     BlockExMarketsAsyncExecution,
     BlockExMarketsAsyncCancelOrderResponse,

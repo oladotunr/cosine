@@ -11,8 +11,8 @@ import multiprocessing as mp
 
 from queue import Empty as EmptyException
 from multiprocessing import Queue
-from core.config import Namespace
-from core.utils import CosineEventSlot
+from cosine.core.config import Namespace
+from cosine.core.utils import CosineEventSlot
 
 
 # MODULE CLASSES

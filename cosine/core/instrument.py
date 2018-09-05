@@ -9,7 +9,7 @@ __author__ = 'dotun rominiyi'
 import sys
 import inspect
 
-from core.tradeable import CosineTradableAsset, CosineSymbology
+from cosine.core.tradeable import CosineTradableAsset, CosineSymbology
 
 
 # MODULE CLASSES

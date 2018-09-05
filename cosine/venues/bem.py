@@ -6,11 +6,11 @@
 __author__ = 'dotun rominiyi'
 
 # IMPORTS
-from core.config import Namespace
-from core.logger import logger
-from venues.base_venue import CosineBaseVenue, AsyncEvents
-from venues.bem.worker import BlockExMarketsSignalRWorker
-from venues.bem.types import BlockExMarketsOrder, BlockExMarketsBalanceInfo
+from cosine.core.config import Namespace
+from cosine.core.logger import logger
+from cosine.venues.base_venue import CosineBaseVenue, AsyncEvents
+from cosine.venues.bem.worker import BlockExMarketsSignalRWorker
+from cosine.venues.bem.types import BlockExMarketsOrder, BlockExMarketsBalanceInfo
 from blockex.tradeapi import interface
 from blockex.tradeapi.tradeapi import BlockExTradeApi
 from blockex.tradeapi.helper import message_raiser, get_error_message

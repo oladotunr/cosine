@@ -9,16 +9,16 @@ __author__ = 'dotun rominiyi'
 import os
 import argparse
 
-from core.config import Config, Namespace
-from core.context import CosineCoreContext
-from core.proc_workers import CosineProcWorkers
-from core.order_worker import CosineOrderWorker
-from core.instrument import CosineInstrument
-from core.utils import debounce
-from venues import collate_venues
-from pricing import collate_feeds, collate_pricers
-from strategies import locate_strategy
-from core.logger import create_logger
+from cosine.core.config import Config, Namespace
+from cosine.core.context import CosineCoreContext
+from cosine.core.proc_workers import CosineProcWorkers
+from cosine.core.order_worker import CosineOrderWorker
+from cosine.core.instrument import CosineInstrument
+from cosine.core.utils import debounce
+from cosine.venues import collate_venues
+from cosine.pricing import collate_feeds, collate_pricers
+from cosine.strategies import locate_strategy
+from cosine.core.logger import create_logger
 
 
 # MODULE CLASSES

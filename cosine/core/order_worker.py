@@ -9,10 +9,10 @@ __author__ = 'dotun rominiyi'
 from datetime import datetime, timedelta
 from enum import Enum
 from decimal import Decimal
-from core.config import Namespace as Pos
-from core.logger import logger
-from core.utils import epsilon_equals
-from venues.base_venue import AsyncEvents, OrderType, OfferType, OrderStatus
+from cosine.core.config import Namespace as Pos
+from cosine.core.logger import logger
+from cosine.core.utils import epsilon_equals
+from cosine.venues.base_venue import AsyncEvents, OrderType, OfferType, OrderStatus
 
 
 # MODULE FUNCTIONS

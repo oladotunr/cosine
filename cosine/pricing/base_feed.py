@@ -7,9 +7,9 @@ __author__ = 'dotun rominiyi'
 
 # IMPORTS
 from decimal import Decimal
-from core.config import Namespace
-from core.proc_workers import CosineProcEventWorker
-from core.utils import CosineEventSlot
+from cosine.core.config import Namespace
+from cosine.core.proc_workers import CosineProcEventWorker
+from cosine.core.utils import CosineEventSlot
 
 
 # MODULE CLASSES

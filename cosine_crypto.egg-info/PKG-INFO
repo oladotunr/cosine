@@ -1,15 +1,18 @@
 Metadata-Version: 2.1
 Name: cosine-crypto
-Version: 0.1.0
+Version: 0.1.1
 Summary: A modular open source cryptocurrency trading algo framework.
 Home-page: https://github.com/oladotunr/cosine
 Author: Oladotun Rominiyi
 Author-email: dotun@voxex.io
 License: UNKNOWN
+Project-URL: Documentation, https://github.com/oladotunr/cosine
+Project-URL: Source, https://github.com/oladotunr/cosine
 Description: # Cosine
         A modular open source cryptocurrency trading algo framework.
         
         
+Keywords: cryptocurrency algo trading blockex
 Platform: UNKNOWN
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: MIT License

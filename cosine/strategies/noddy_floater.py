@@ -7,7 +7,7 @@ __author__ = 'dotun rominiyi'
 
 # IMPORTS
 import random
-from core.order_worker import Pos
+from cosine.core.order_worker import Pos
 from .base_strategy import CosineBaseStrategy
 
 

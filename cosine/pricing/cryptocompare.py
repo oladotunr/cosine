@@ -8,7 +8,7 @@ __author__ = 'dotun rominiyi'
 # IMPORTS
 from decimal import Decimal
 from socketIO_client import SocketIO
-from core.instrument import CosinePairInstrument
+from cosine.core.instrument import CosinePairInstrument
 from .base_feed import CosineBaseFeed
 
 

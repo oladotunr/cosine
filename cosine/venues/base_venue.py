@@ -8,7 +8,7 @@ __author__ = 'dotun rominiyi'
 # IMPORTS
 import inspect
 from enum import Enum
-from core.order_worker import PendingAction
+from cosine.core.order_worker import PendingAction
 
 
 # MODULE CLASSES

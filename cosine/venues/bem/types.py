@@ -8,8 +8,8 @@ __author__ = 'dotun rominiyi'
 # IMPORTS
 from datetime import datetime
 from decimal import Decimal
-from core.config import Namespace
-from venues.base_venue import (
+from cosine.core.config import Namespace
+from cosine.venues.base_venue import (
     OfferType, OrderType, OrderStatus,
     CosineNewOrder,
     CosineOrder,
