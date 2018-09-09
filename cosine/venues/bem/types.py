@@ -8,7 +8,7 @@ __author__ = 'dotun rominiyi'
 # IMPORTS
 from datetime import datetime
 from decimal import Decimal
-from cosine.core.config import Namespace
+from cosine.core.config import FieldSet
 from cosine.venues.base_venue import (
     OfferType, OrderType, OrderStatus,
     CosineNewOrder,
@@ -107,7 +107,7 @@ class BlockExMarketsAsyncCancelAllResponse(CosineCancelAllResponse):
         return self._msg['failedOrderIDs']
 
 
-class Balance(Namespace):
+class Balance(FieldSet):
     pass
 
 

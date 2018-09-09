@@ -6,7 +6,7 @@
 __author__ = 'dotun rominiyi'
 
 # IMPORTS
-from cosine.core.config import Namespace
+from cosine.core.config import FieldSet
 from cosine.core.logger import logger
 from cosine.venues.base_venue import CosineBaseVenue, AsyncEvents
 from cosine.venues.bem.worker import BlockExMarketsSignalRWorker
@@ -70,7 +70,7 @@ class BlockExMarketsVenue(CosineBaseVenue):
         self.trade_api.get_quote_currencies = get_quote_currencies.__get__(self.trade_api, BlockExTradeApi)
 
         # retrieve all the currencies supported...
-        build_ccy = lambda ccy: Namespace(
+        build_ccy = lambda ccy: FieldSet(
             venue_id=ccy["id"],
             name=ccy["currencyName"],
             symbol=ccy["symbol"],
@@ -139,7 +139,7 @@ class BlockExMarketsVenue(CosineBaseVenue):
 
     def _get_instruments(self):
         trader_instruments = self.trade_api.get_trader_instruments()
-        self._instruments = [Namespace(
+        self._instruments = [FieldSet(
             cls="CosinePairInstrument",
 
             asset=self._currencies[bem_instr["baseCurrencyID"]],

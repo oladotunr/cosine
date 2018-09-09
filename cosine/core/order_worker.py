@@ -9,7 +9,7 @@ __author__ = 'dotun rominiyi'
 from datetime import datetime, timedelta
 from enum import Enum
 from decimal import Decimal
-from cosine.core.config import Namespace as Pos
+from cosine.core.config import FieldSet as Pos
 from cosine.core.logger import logger
 from cosine.core.utils import epsilon_equals
 from cosine.core.order_worker_types import PendingAction

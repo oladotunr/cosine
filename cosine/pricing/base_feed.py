@@ -7,7 +7,7 @@ __author__ = 'dotun rominiyi'
 
 # IMPORTS
 from decimal import Decimal
-from cosine.core.config import Namespace
+from cosine.core.config import FieldSet
 from cosine.core.proc_workers import CosineProcEventWorker
 from cosine.core.utils import CosineEventSlot
 
@@ -37,7 +37,7 @@ class CosineBaseFeed(object):
         self._cxt = cxt
         self._cache = {}
         self._worker = None
-        self._events = Namespace()
+        self._events = FieldSet()
         self._events.OnTick = CosineEventSlot()
 
 
@@ -73,7 +73,7 @@ class CosineBaseFeed(object):
         for instr_name in instruments:
             if not (instr_name in self._cxt.instruments): continue
             instrument = self._cxt.instruments[instr_name]
-            self._cache[instr_name] = Namespace(
+            self._cache[instr_name] = FieldSet(
                 instrument=instrument,
                 lastmarket=None,
                 lasttradedmid=Decimal(0.0),

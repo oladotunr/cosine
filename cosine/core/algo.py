@@ -8,7 +8,7 @@ __author__ = 'dotun rominiyi'
 # IMPORTS
 import os
 
-from cosine.core.config import Config, Namespace
+from cosine.core.config import Config, FieldSet
 from cosine.core.context import CosineCoreContext
 from cosine.core.proc_workers import CosineProcWorkers
 from cosine.core.order_worker import CosineOrderWorker
@@ -33,7 +33,7 @@ class CosineAlgo(object):
         self._cfg_file = None
         self.logger = None
         self._args = cmdline_args
-        self.instr_cache = Namespace()
+        self.instr_cache = FieldSet()
         self.init_logging(logger=logger)
 
 
@@ -77,7 +77,7 @@ class CosineAlgo(object):
 
 
     def setup_order_workers(self):
-        self._cxt.orders = Namespace()
+        self._cxt.orders = FieldSet()
         venue_names = self._cfg.get("venues", {}).keys()
         instr_names = self._cfg.get("instruments", {})
         for k in venue_names:
@@ -94,7 +94,7 @@ class CosineAlgo(object):
 
 
     def setup_pricing_feeds(self):
-        self._cxt.feeds = Namespace()
+        self._cxt.feeds = FieldSet()
         feed_defs = self._cfg.get("feeds", {})
         feed_names = feed_defs.keys()
         feeds = collate_feeds(feed_names)
@@ -105,7 +105,7 @@ class CosineAlgo(object):
 
 
     def setup_pricers(self):
-        self._cxt.pricers = Namespace()
+        self._cxt.pricers = FieldSet()
         pricer_names = self._cfg.get("pricers", "nullpricer").split(',')
         pricer_defs = self._cfg.get("pricers", {}).get("settings", {})
         pricers = collate_pricers(pricer_names)

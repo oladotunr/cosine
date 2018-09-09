@@ -13,7 +13,20 @@ from argparse import Namespace
 
 
 # MODULE CLASSES
-class Section(Namespace):
+class FieldSet(Namespace):
+
+    def get(self, key, default=None):
+        return getattr(self, key, default)
+
+
+    def __getitem__(self, key):
+        if hasattr(self, key):
+            return getattr(self, key)
+        raise IndexError("No attribute found at index: "+key)
+
+
+
+class Section(FieldSet):
     pass
 
 

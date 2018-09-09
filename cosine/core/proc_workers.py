@@ -11,7 +11,7 @@ import multiprocessing as mp
 
 from queue import Empty as EmptyException
 from multiprocessing import Queue
-from cosine.core.config import Namespace
+from cosine.core.config import FieldSet
 from cosine.core.utils import CosineEventSlot
 
 
@@ -42,7 +42,7 @@ class CosineProcEventMgr(object):
 
     def init_queue(self):
         self._events = Queue()
-        self._slots = Namespace()
+        self._slots = FieldSet()
 
     def process_events(self):
         # consume all the available events...
