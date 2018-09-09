@@ -6,7 +6,6 @@
 __author__ = 'dotun rominiyi'
 
 # IMPORTS
-import inspect
 import importlib
 
 from sys import float_info as flt
@@ -45,7 +44,7 @@ def collate_classes(BaseClass):
                 (m, pkg) = m
             module = importlib.import_module(m, package=pkg)
             clsmembers = [
-                cls for cls in inspect.getmembers(module, inspect.isclass) if isinstance(cls, type) and issubclass(cls, BaseClass)
+                cls for cls in module.__dict__.values() if isinstance(cls, type) and issubclass(cls, BaseClass) and (cls is not BaseClass)
             ]
             if len(clsmembers) > 0:
                 classes[m] = clsmembers[0]
@@ -56,7 +55,7 @@ def locate_class(BaseClass):
     def locator(module_name, pkg=None):
         module = importlib.import_module(module_name, package=pkg)
         clsmembers = [
-            cls for cls in inspect.getmembers(module, inspect.isclass) if isinstance(cls, type) and issubclass(cls, BaseClass)
+            cls for cls in module.__dict__.values() if isinstance(cls, type) and issubclass(cls, BaseClass) and (cls is not BaseClass)
         ]
         return clsmembers[0] if len(clsmembers) > 0 else None
     return locator

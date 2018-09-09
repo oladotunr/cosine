@@ -12,7 +12,7 @@ from base64 import b64decode
 from zlib import decompress, MAX_WBITS
 from signalr_aio import Connection as SignalRConnection
 
-from cosine.core.proc_workers import CosineProcWorkers
+from cosine.core.proc_workers import CosineProcWorkers, CosineProcEventWorker
 from cosine.venues.base_venue import AsyncEvents
 from cosine.venues.bem.types import (
     BlockExMarketsAsyncOrder,
@@ -23,29 +23,29 @@ from cosine.venues.bem.types import (
 
 
 # MODULE CLASSES
-class BlockExMarketsSignalRWorker(CosineProcWorkers.EventWorker):
+class BlockExMarketsSignalRWorker(CosineProcEventWorker):
 
     def __init__(self, group=None, target=None, name=None, args=(), kwargs={}):
         super().__init__(group, target, name, args, kwargs)
         self._hub = None
         self._connection = None
         self._responder = None
-        self.events.OnPlaceOrder = CosineProcWorkers.EventWorker.EventSlot()
-        self.events.OnExecution = CosineProcWorkers.EventWorker.EventSlot()
-        self.events.OnCancelOrder = CosineProcWorkers.EventWorker.EventSlot()
-        self.events.OnCancelAllOrders = CosineProcWorkers.EventWorker.EventSlot()
-        self.events.OnLatestBids = CosineProcWorkers.EventWorker.EventSlot()
-        self.events.OnLatestAsks = CosineProcWorkers.EventWorker.EventSlot()
-        self.events.OnMarketTick = CosineProcWorkers.EventWorker.EventSlot()
-        self.events.OnError = CosineProcWorkers.EventWorker.EventSlot()
+        self.events.OnPlaceOrder = CosineProcEventWorker.EventSlot()
+        self.events.OnExecution = CosineProcEventWorker.EventSlot()
+        self.events.OnCancelOrder = CosineProcEventWorker.EventSlot()
+        self.events.OnCancelAllOrders = CosineProcEventWorker.EventSlot()
+        self.events.OnLatestBids = CosineProcEventWorker.EventSlot()
+        self.events.OnLatestAsks = CosineProcEventWorker.EventSlot()
+        self.events.OnMarketTick = CosineProcEventWorker.EventSlot()
+        self.events.OnError = CosineProcEventWorker.EventSlot()
 
 
     """Worker process setup"""
     def run(self):
 
         # setup SignalR connection (w/ authentication)
-        connection = SignalRConnection(f"{self.cfg.venues.bem.APIDomain}/signalr", session=None)
-        connection.qs = {'access_token': self.trade_api.access_token}
+        connection = SignalRConnection(f"{self.kwargs.APIDomain}/signalr", session=None)
+        connection.qs = {'access_token': self.kwargs.access_token}
 
         hub = connection.register_hub('TradingHub')
 
@@ -100,14 +100,14 @@ class BlockExMarketsSignalRWorker(CosineProcWorkers.EventWorker):
     """Worker process market tick received"""
     async def on_market_tick_received(self, msg):
         self._responder = self.on_bids_received
-        self._hub.server.invoke("getBids", self.cfg.venues.bem.APIID, msg['instrumentID'])
+        self._hub.server.invoke("getBids", self.kwargs.APIID, msg['instrumentID'])
 
 
     """Worker process market tick received"""
     async def on_bids_received(self, msg):
         self.enqueue_event('OnLatestBids', msg)
         self._responder = self.on_asks_received
-        self._hub.server.invoke("getAsks", self.cfg.venues.bem.APIID, msg['instrumentID'])
+        self._hub.server.invoke("getAsks", self.kwargs.APIID, msg['instrumentID'])
 
 
     """Worker process market tick received"""

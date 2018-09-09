@@ -55,14 +55,14 @@ class BlockExMarketsVenue(CosineBaseVenue):
     def setup(self):
         # initialise the HTTP API
         self.trade_api = BlockExTradeApi(
-            self.cfg.venues.bem.Username,
-            self.cfg.venues.bem.Password,
-            self.cfg.venues.bem.APIDomain,
-            self.cfg.venues.bem.APIID
+            self.Username,
+            self.Password,
+            self.APIDomain,
+            self.APIID
         )
 
         # initialise the streaming API
-        if self.cfg.venues.bem.ConnectSignalR:
+        if self.ConnectSignalR:
             self._setup_signalr_stream()
 
         # bootstrap the API with some more functions:
@@ -201,7 +201,12 @@ class BlockExMarketsVenue(CosineBaseVenue):
         self._worker.events.OnError += BlockExMarketsVenue.on_error
 
         # kick off the worker thread...
-        self._worker.run_via(self._pool)
+        self._worker.run_via(
+            self._pool,
+            access_token=self.trade_api.access_token,
+            APIDomain=self.APIDomain,
+            APIID=self.APIID
+        )
 
 
     @property

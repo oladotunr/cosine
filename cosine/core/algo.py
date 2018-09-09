@@ -73,7 +73,7 @@ class CosineAlgo(object):
         venues = collate_venues(venue_names)
         for k in venue_names:
             VenueClass = venues[k]
-            self._venues[k] = VenueClass(self._worker_pool, self._cxt, **venue_defs)
+            self._venues[k] = VenueClass(self._worker_pool, self._cxt, **venue_defs[k])
             self._venues[k].setup()
 
 
@@ -101,7 +101,7 @@ class CosineAlgo(object):
         feeds = collate_feeds(feed_names)
         for k in feeds:
             PricingFeedClass = feeds[k]
-            self._cxt.feeds[k] = PricingFeedClass(k, self._worker_pool, self._cxt, **feeds[k])
+            self._cxt.feeds[k] = PricingFeedClass(k, self._worker_pool, self._cxt, **feed_defs[k])
             self._cxt.feeds[k].setup()
 
 

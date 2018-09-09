@@ -85,9 +85,6 @@ class CosineProcEventWorker(CosineProcWorker, CosineProcEventMgr):
 
 class CosineProcWorkers(object):
 
-    Worker = CosineProcWorker
-    EventWorker = CosineProcEventWorker
-
     def __init__(self, cfg):
         self.cfg = cfg
         self._procs = {}
