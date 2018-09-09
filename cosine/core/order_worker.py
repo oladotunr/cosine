@@ -12,6 +12,7 @@ from decimal import Decimal
 from cosine.core.config import Namespace as Pos
 from cosine.core.logger import logger
 from cosine.core.utils import epsilon_equals
+from cosine.core.order_worker_types import PendingAction
 from cosine.venues.base_venue import AsyncEvents, OrderType, OfferType, OrderStatus
 
 
@@ -27,27 +28,6 @@ def empty_pos(price=Decimal(0.0)):
 
 
 # MODULE CLASSES
-class LostControlError(Exception):
-    pass
-
-
-class PendingAction(Enum):
-    NONE                = 0
-    NEW_ORDER           = 1
-    AMEND_ORDER         = 2
-    CANCEL_ORDER        = 3
-    CANCEL_ALL          = 4
-
-    @classmethod
-    def from_status(cls, status, prev_pending):
-        if prev_pending is cls.NONE:
-            return {
-                OrderStatus.Pending: cls.NEW_ORDER
-            }.get(status, cls.NONE)
-        else:
-            return prev_pending
-
-
 class CosineOrderWorker(object):
 
     def __init__(self, active_depth, instrument, venue):

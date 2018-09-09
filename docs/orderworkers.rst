@@ -1,4 +1,0 @@
-Order Workers
-=============
-
-.. contents:: :local:

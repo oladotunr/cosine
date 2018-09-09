@@ -1,6 +1,7 @@
 README.md
 setup.py
 cosine/__init__.py
+cosine/config.yaml.example
 cosine/core/__init__.py
 cosine/core/algo.py
 cosine/core/config.py
@@ -8,6 +9,7 @@ cosine/core/context.py
 cosine/core/instrument.py
 cosine/core/logger.py
 cosine/core/order_worker.py
+cosine/core/order_worker_types.py
 cosine/core/proc_workers.py
 cosine/core/tradeable.py
 cosine/core/utils.py

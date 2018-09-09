@@ -21,17 +21,13 @@ Contents
 
    quickstart
    overview
-   algo
-   context
    configuration
-   logging
-   processworkers
-   orderworkers
    pricingfeeds
    pricers
    strategies
    noddyfloater
    venues
+   processworkers
    troubleshooting
 
 

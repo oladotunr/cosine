@@ -6,7 +6,7 @@
 __author__ = 'dotun rominiyi'
 
 # IMPORTS
-from core.utils import collate_classes, locate_class
+from cosine.core.utils import collate_classes, locate_class
 from .base_feed import CosineBaseFeed
 from .pricers.base_pricer import CosinePricer
 

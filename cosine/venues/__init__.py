@@ -6,7 +6,7 @@
 __author__ = 'dotun rominiyi'
 
 # IMPORTS
-from core.utils import collate_classes
+from cosine.core.utils import collate_classes
 from .base_venue import CosineBaseVenue
 
 

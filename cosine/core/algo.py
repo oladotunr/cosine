@@ -7,7 +7,6 @@ __author__ = 'dotun rominiyi'
 
 # IMPORTS
 import os
-import argparse
 
 from cosine.core.config import Config, Namespace
 from cosine.core.context import CosineCoreContext
@@ -46,8 +45,8 @@ class CosineAlgo(object):
 
 
     def setup(self):
-        self._base_cfg_file = os.environ.get("COSINE_CFG", self._args.get("config", "./config.yaml"))
-        self._environment = os.environ.get("COSINE_ENV", self._args.get("env", "DEV"))
+        self._base_cfg_file = self._args.get("config", os.environ.get("COSINE_CFG", "./config.yaml"))
+        self._environment = self._args.get("env", os.environ.get("COSINE_ENV", "DEV"))
         self._cfg_file = os.path.splitext(self._base_cfg_file)[0] + self._environment.lower() + ".yaml"
 
         self._cfg = Config()

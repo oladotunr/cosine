@@ -15,10 +15,10 @@ logger = None
 
 # MODULE CLASSES
 def create_logger(args):
-    appname = os.environ.get("COSINE_APP", args.get("appname", "cosine"))
-    env = os.environ.get("COSINE_ENV", args.get("env", "DEV"))
-    log_file = os.environ.get("COSINE_LOGFILE", args.get("logfile", "{0}.{1}.{2}.log".format(appname, env, os.getpid())))
-    log_level = os.environ.get("COSINE_LOGLVL", args.get("loglevel", "INFO"))
+    appname = args.get("appname", os.environ.get("COSINE_APP", "cosine"))
+    env = args.get("env", os.environ.get("COSINE_ENV", "DEV"))
+    log_file = args.get("logfile", os.environ.get("COSINE_LOGFILE", "{0}.{1}.{2}.log".format(appname, env, os.getpid())))
+    log_level = args.get("loglevel", os.environ.get("COSINE_LOGLVL", "INFO"))
 
     _logger = logging.getLogger(appname)
     _logger.setLevel(logging._nameToLevel[log_level])

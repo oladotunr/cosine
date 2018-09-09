@@ -6,7 +6,7 @@
 __author__ = 'dotun rominiyi'
 
 # IMPORTS
-from core.utils import locate_class
+from cosine.core.utils import locate_class
 from .base_strategy import CosineBaseStrategy
 
 

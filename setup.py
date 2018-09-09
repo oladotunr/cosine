@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="cosine-crypto",
-    version="0.1.1",
+    version="0.1.5",
     author="Oladotun Rominiyi",
     author_email="dotun@voxex.io",
     description="A modular open source cryptocurrency trading algo framework.",
@@ -22,6 +22,9 @@ setuptools.setup(
     project_urls={
         'Documentation': 'https://github.com/oladotunr/cosine',
         'Source': 'https://github.com/oladotunr/cosine',
+    },
+    package_data={
+        'cosine': ['config.yaml.example'],
     },
 )
 
