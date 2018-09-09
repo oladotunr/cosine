@@ -24,8 +24,8 @@ cosine/strategies/base_strategy.py
 cosine/strategies/noddy_floater.py
 cosine/venues/__init__.py
 cosine/venues/base_venue.py
-cosine/venues/bem.py
 cosine/venues/bem/__init__.py
+cosine/venues/bem/bem.py
 cosine/venues/bem/types.py
 cosine/venues/bem/worker.py
 cosine_crypto.egg-info/PKG-INFO

@@ -25,6 +25,9 @@ class FieldSet(Namespace):
         raise IndexError("No attribute found at index: "+key)
 
 
+    def keys(self):
+        return self.__dict__.keys()
+
 
 class Section(FieldSet):
     pass
@@ -40,7 +43,7 @@ class Config(Section):
 
     def load(self, file_path=None, stream=None):
 
-        if file_path:
+        if file_path and os.path.exists(file_path):
             with open(file_path, "r") as fp:
                 raw_cfg = yaml.safe_load(fp)
         elif stream:
@@ -49,7 +52,7 @@ class Config(Section):
             raise ValueError("Config: no source file or stream provided")
 
         for k in raw_cfg:
-            val = Config.cvn(raw_cfg.get(k, getattr(self, k)))
+            val = Config.cvn(raw_cfg.get(k, self.get(k)))
             setattr(self, k, val)
 
 

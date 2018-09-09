@@ -6,7 +6,7 @@
 __author__ = 'dotun rominiyi'
 
 # IMPORTS
-
+from .bem import *
 
 
 # MODULE CLASSES
