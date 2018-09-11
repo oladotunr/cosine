@@ -35,7 +35,7 @@ def create_logger(args):
     sh = logging.StreamHandler()
     sh.setLevel(log_level)
     sh.setFormatter(formatter)
-    logger.addHandler(sh)
+    _logger.addHandler(sh)
 
     # set the logger to module scope variable for universal access...
     globals()["logger"] = _logger
