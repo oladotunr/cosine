@@ -98,7 +98,7 @@ class CosineAlgo(object):
                 instrument = CosineInstrument.load(self.instr_cache, **instr_defs[instr])
                 self._cxt.instruments[instrument.name] = instrument
                 order_worker = CosineOrderWorker(self._cfg.orders.ActiveDepth, instrument, venue, logger=self.logger)
-                self._cxt.orders[k][instr.symbol] = order_worker
+                self._cxt.orders[k][instrument.symbol] = order_worker
                 venue_instruments += 1
         if venue_instruments == 0:
             raise LookupError("No instruments loaded for any of the provided venues")

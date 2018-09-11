@@ -129,14 +129,14 @@ class BlockExMarketsSignalRWorker(CosineProcEventWorker):
     """Worker process market tick received"""
     async def on_market_tick_received(self, msg):
         self._responder = self.on_bids_received
-        self._hub.server.invoke("getBids", self.kwargs.APIID, msg['instrumentID'])
+        self._hub.server.invoke("getBids", self.kwargs['APIID'], msg['instrumentID'])
 
 
     """Worker process market tick received"""
     async def on_bids_received(self, msg):
         self.enqueue_event('OnLatestBids', msg)
         self._responder = self.on_asks_received
-        self._hub.server.invoke("getAsks", self.kwargs.APIID, msg['instrumentID'])
+        self._hub.server.invoke("getAsks", self.kwargs['APIID'], msg['instrumentID'])
 
 
     """Worker process market tick received"""

@@ -37,7 +37,7 @@ class CosineInstrument(CosineTradableAsset):
         else:
             instrument_classes = cache["_instr_classes"]
 
-        InstrumentClass = instrument_classes[instr_def.get("cls", "CosinePairInstrument")]
+        InstrumentClass = instrument_classes[instr_def.get("cls", "CosineInstrument")]
         return InstrumentClass(cache=cache, **instr_def)
 
 
@@ -57,6 +57,7 @@ class CosinePairInstrument(CosineTradableAsset):
         self._type = kwargs["type"]
         self._precision = kwargs["precision"]
         self._symbology = CosineSymbology(kwargs, **kwargs["symbology"])
+        self._symbology.venue_id = kwargs.get('venue_id')
         if cache:
             cache[self.symbol] = self
 

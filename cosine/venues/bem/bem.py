@@ -73,12 +73,13 @@ class BlockExMarketsVenue(CosineBaseVenue):
         build_ccy = lambda ccy: FieldSet(
             venue_id=ccy["id"],
             name=ccy["currencyName"],
-            symbol=ccy["symbol"],
+            symbol=ccy["isoCode"],
             category="crypto" if ccy["type"] is not "fiat" else "fiat",
             type=ccy["type"],
             precision=ccy["precision"],
             symbology={
-                "symbol": ccy["symbol"],
+                "symbol": ccy["currencyName"],
+                "symbolmark": ccy["symbol"],
                 "iso": ccy["isoCode"],
                 "label": ccy.get("description", ccy["currencyName"]),
             }
