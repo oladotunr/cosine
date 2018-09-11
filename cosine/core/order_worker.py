@@ -189,7 +189,7 @@ class CosineOrderWorker(object):
                 order_type=OrderType.Limit,
                 max_count=self._depth * 2
             )
-        except:
+        except Exception as e:
             raise LostControlError(str("Could not get all open orders for instrument: "+self._instr.name))
 
         # populate the bids and asks based on the known state at the venue...

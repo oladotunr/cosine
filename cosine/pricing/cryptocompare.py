@@ -103,8 +103,8 @@ class CryptoCompareSocketIOFeed(CosineBaseFeed):
     def _setup(self):
 
         # establish the connection...
-        self.logger.info(f"CryptoCompareSocketIOFeed - Establishing connection: {self.endpoint}")
-        self._socketio = SocketIO(self.endpoint, 80)
+        self.logger.info(f"CryptoCompareSocketIOFeed - Establishing connection: {self.endpoint} ({self.port})")
+        self._socketio = SocketIO(self.endpoint, self.port)
 
         # subscribe for all instruments...
         subs = []

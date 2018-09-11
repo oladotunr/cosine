@@ -7,7 +7,7 @@ __author__ = 'dotun rominiyi'
 
 # IMPORTS
 from cosine.core.config import FieldSet
-from cosine.venues.base_venue import CosineBaseVenue, AsyncEvents
+from cosine.venues.base_venue import CosineBaseVenue, AsyncEvents, OrderType, OfferType
 from cosine.venues.bem.worker import BlockExMarketsSignalRWorker
 from cosine.venues.bem.types import BlockExMarketsOrder, BlockExMarketsBalanceInfo
 from blockex.tradeapi import interface
@@ -172,8 +172,8 @@ class BlockExMarketsVenue(CosineBaseVenue):
     def get_open_orders(self, instrument, order_type=None, offer_type=None, max_count=100):
         orders = self.trade_api.get_orders(
             instrument_id=instrument.venue_id,
-            order_type=order_type,
-            offer_type=offer_type,
+            order_type=BlockExMarketsVenue.to_TradeAPI_OrderType(order_type),
+            offer_type=BlockExMarketsVenue.to_TradeAPI_OfferType(offer_type),
             status=[10,20,50],
             max_count=max_count
         )
@@ -181,7 +181,13 @@ class BlockExMarketsVenue(CosineBaseVenue):
 
 
     def new_order(self, offer_type, order_type, instrument, price, quantity, attrs=None):
-        msg = self.trade_api.create_order(offer_type, order_type, instrument.venue_id, price, quantity)
+        msg = self.trade_api.create_order(
+            BlockExMarketsVenue.to_TradeAPI_OfferType(offer_type),
+            BlockExMarketsVenue.to_TradeAPI_OrderType(order_type),
+            instrument.venue_id,
+            price,
+            quantity
+        )
         return BlockExMarketsOrder(api_msg=msg)
 
 
@@ -209,6 +215,22 @@ class BlockExMarketsVenue(CosineBaseVenue):
             APIID=self.APIID,
             CertFile=self.CertFile
         )
+
+
+    @staticmethod
+    def to_TradeAPI_OrderType(t):
+        return {
+            OrderType.Limit: interface.OrderType.LIMIT,
+            OrderType.Market: interface.OrderType.MARKET,
+            OrderType.Stop: interface.OrderType.STOP,
+        }[t]
+
+    @staticmethod
+    def to_TradeAPI_OfferType(t):
+        return {
+            OfferType.Bid: interface.OfferType.BID,
+            OrderType.Ask: interface.OfferType.ASK,
+        }[t]
 
 
     @property
