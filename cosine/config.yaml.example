@@ -17,7 +17,9 @@ venues:
         ConnectSignalR: true
 
 instruments:
-- "DAXT/EUR"
+- "XTN/EUR"
+- "RCC/Euro"
+- "ETH4/EUR"
 
 feeds:
     cryptocompare:
@@ -25,7 +27,9 @@ feeds:
         endpoint: https://streamer.cryptocompare.com/
         framework: socket.io
         instruments:
-        - "DAXT/EUR"
+        - "XTN/EUR"
+        - "RCC/Euro"
+        - "ETH4/EUR"
 feed:
     Primary: cryptocompare
 

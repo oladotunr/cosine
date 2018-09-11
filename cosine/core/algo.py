@@ -87,6 +87,7 @@ class CosineAlgo(object):
         venue_names = self._cfg.get("venues", {}).keys()
         instr_names = self._cfg.get("instruments", {})
         self.logger.info("CosineAlgo - instruments:")
+        venue_instruments = 0
         for k in venue_names:
             self._cxt.orders[k] = {}
             venue = self._venues[k]
@@ -98,6 +99,9 @@ class CosineAlgo(object):
                 self._cxt.instruments[instrument.name] = instrument
                 order_worker = CosineOrderWorker(self._cfg.orders.ActiveDepth, instrument, venue, logger=self.logger)
                 self._cxt.orders[k][instr.symbol] = order_worker
+                venue_instruments += 1
+        if venue_instruments == 0:
+            raise LookupError("No instruments loaded for any of the provided venues")
 
 
     def setup_pricing_feeds(self):
