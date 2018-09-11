@@ -7,7 +7,6 @@ __author__ = 'dotun rominiyi'
 
 # IMPORTS
 from cosine.core.config import FieldSet
-from cosine.core.logger import logger
 from cosine.venues.base_venue import CosineBaseVenue, AsyncEvents
 from cosine.venues.bem.worker import BlockExMarketsSignalRWorker
 from cosine.venues.bem.types import BlockExMarketsOrder, BlockExMarketsBalanceInfo
@@ -17,12 +16,12 @@ from blockex.tradeapi.helper import message_raiser, get_error_message
 
 
 # MODULE FUNCTIONS
-API_GET_ACTIVE_CCYS = "api/lookups/currencies"
-API_GET_QUOTE_CCYS = "api/lookups/quotecurrencies"
+API_GET_ACTIVE_CCYS = "api/lookups/currencies?ApiID={0}"
+API_GET_QUOTE_CCYS = "api/lookups/quotecurrencies?ApiID={0}"
 
 
 def get_active_currencies(self):
-    response = self.make_authorized_request(self.get_path, API_GET_ACTIVE_CCYS)
+    response = self.make_authorized_request(self.get_path, API_GET_ACTIVE_CCYS.format(self.api_id))
     if response.status_code == interface.SUCCESS:
         ccys = response.json()
         return ccys
@@ -31,7 +30,7 @@ def get_active_currencies(self):
                    error_message=get_error_message(response))
 
 def get_quote_currencies(self):
-    response = self.make_authorized_request(self.get_path, API_GET_QUOTE_CCYS)
+    response = self.make_authorized_request(self.get_path, API_GET_QUOTE_CCYS.format(self.api_id))
     if response.status_code == interface.SUCCESS:
         ccys = response.json()
         return ccys
@@ -43,13 +42,14 @@ def get_quote_currencies(self):
 # MODULE CLASSES
 class BlockExMarketsVenue(CosineBaseVenue):
 
-    def __init__(self, worker_pool, cxt, **kwargs):
-        super().__init__(worker_pool, cxt, **kwargs)
+    def __init__(self, worker_pool, cxt, logger=None, **kwargs):
+        super().__init__(worker_pool, cxt, logger=logger, **kwargs)
         self._currencies = None
         self._instruments = None
         self.trade_api = None
         self._worker = BlockExMarketsSignalRWorker()
         self.cfg = self._pool.cfg
+        self.CertFile = self.cfg.get("system.network.ssl.CertFile")
 
 
     def setup(self):
@@ -80,7 +80,7 @@ class BlockExMarketsVenue(CosineBaseVenue):
             symbology={
                 "symbol": ccy["symbol"],
                 "iso": ccy["isoCode"],
-                "label": ccy["description"],
+                "label": ccy.get("description", ccy["currencyName"]),
             }
         )
         self._currencies = {
@@ -191,21 +191,21 @@ class BlockExMarketsVenue(CosineBaseVenue):
         self.trade_api.cancel_all_orders(instrument.venue_id)
 
 
-    @staticmethod
-    def on_error(msg):
-        logger.error(msg)
+    def on_error(self, msg):
+        self.logger.error(msg)
 
 
     def _setup_signalr_stream(self):
         # setup any message handlers...
-        self._worker.events.OnError += BlockExMarketsVenue.on_error
+        self._worker.events.OnError += self.on_error
 
         # kick off the worker thread...
         self._worker.run_via(
             self._pool,
             access_token=self.trade_api.access_token,
             APIDomain=self.APIDomain,
-            APIID=self.APIID
+            APIID=self.APIID,
+            CertFile=self.CertFile
         )
 
 

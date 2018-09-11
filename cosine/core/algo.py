@@ -45,6 +45,7 @@ class CosineAlgo(object):
 
 
     def setup(self):
+        self.logger.info("CosineAlgo - setup initiated")
         self._base_cfg_file = self._args.get("config", os.environ.get("COSINE_CFG", "./config.yaml"))
         self._environment = self._args.get("env", os.environ.get("COSINE_ENV", "DEV"))
         self._cfg_file = os.path.splitext(self._base_cfg_file)[0] + "." + self._environment.lower() + ".yaml"
@@ -55,6 +56,7 @@ class CosineAlgo(object):
             self._cfg.load(file_path=self._cfg_file)
         self._cfg.Environment = self._environment
         self._cfg.CmdLnArgs = self._args
+        self._cfg.log_config(logger=self.logger)
 
         self._worker_pool = CosineProcWorkers(self._cfg)
         self._cxt = CosineCoreContext()
@@ -64,6 +66,7 @@ class CosineAlgo(object):
         self.setup_pricing_feeds()
         self.setup_pricers()
         self.setup_strategy()
+        self.logger.info("CosineAlgo - setup complete")
 
 
     def setup_venues(self):
@@ -71,9 +74,11 @@ class CosineAlgo(object):
         venue_defs = self._cfg.get("venues", {})
         venue_names = venue_defs.keys()
         venues = collate_venues(venue_names)
+        self.logger.info("\nCosineAlgo - venues:")
         for k in venue_names:
+            self.logger.info(f"CosineAlgo -     Loading venue: [{k}]")
             VenueClass = venues[k]
-            self._venues[k] = VenueClass(self._worker_pool, self._cxt, **venue_defs[k])
+            self._venues[k] = VenueClass(self._worker_pool, self._cxt, logger=self.logger, **venue_defs[k])
             self._venues[k].setup()
 
 
@@ -81,16 +86,17 @@ class CosineAlgo(object):
         self._cxt.orders = FieldSet()
         venue_names = self._cfg.get("venues", {}).keys()
         instr_names = self._cfg.get("instruments", {})
+        self.logger.info("\nCosineAlgo - instruments:")
         for k in venue_names:
             self._cxt.orders[k] = {}
             venue = self._venues[k]
             instr_defs = venue.get_instrument_defs(instr_names)
             for instr in instr_names:
                 if not (instr in instr_defs): continue
-                self.logger.info("Loading instrument: "+instr)
+                self.logger.info(f"CosineAlgo -     Loading instrument: [{instr}]")
                 instrument = CosineInstrument.load(self.instr_cache, instr_defs[instr])
                 self._cxt.instruments[instrument.name] = instrument
-                order_worker = CosineOrderWorker(self._cfg.orders.ActiveDepth, instrument, venue)
+                order_worker = CosineOrderWorker(self._cfg.orders.ActiveDepth, instrument, venue, logger=self.logger)
                 self._cxt.orders[k][instr.symbol] = order_worker
 
 
@@ -99,21 +105,25 @@ class CosineAlgo(object):
         feed_defs = self._cfg.get("feeds", {})
         feed_names = feed_defs.keys()
         feeds = collate_feeds(feed_names)
+        self.logger.info("\nCosineAlgo - feeds:")
         for k in feeds:
+            self.logger.info(f"CosineAlgo -     Loading feed: [{k}]")
             PricingFeedClass = feeds[k]
-            self._cxt.feeds[k] = PricingFeedClass(k, self._worker_pool, self._cxt, **feed_defs[k])
+            self._cxt.feeds[k] = PricingFeedClass(k, self._worker_pool, self._cxt, logger=self.logger, **feed_defs[k])
             self._cxt.feeds[k].setup()
 
 
     def setup_pricers(self):
         self._cxt.pricers = FieldSet()
-        pricer_names = self._cfg.get("pricers", "nullpricer").split(',')
+        pricer_names = self._cfg.get("pricers", {}).get("Default", "nullpricer").split(',')
         pricer_defs = self._cfg.get("pricers", {}).get("settings", {})
         pricers = collate_pricers(pricer_names)
         self._cxt.pricer_seq = pricer_names
+        self.logger.info("\nCosineAlgo - pricers:")
         for k in pricers:
+            self.logger.info(f"CosineAlgo -     Loading pricer: [{k}]")
             PricerClass = pricers[k]
-            self._cxt.pricers[k] = PricerClass(k, self._worker_pool, self._cxt, **pricer_defs[k])
+            self._cxt.pricers[k] = PricerClass(k, self._worker_pool, self._cxt, logger=self.logger, **pricer_defs[k])
             self._cxt.pricers[k].setup()
 
 
@@ -124,7 +134,8 @@ class CosineAlgo(object):
         StrategyClass = locate_strategy(strat_name)
         if not StrategyClass:
             raise ValueError("Failed to identify a valid strategy")
-        self._cxt.strategy = StrategyClass(self._cfg, self._cxt, self._venues, self._worker_pool, **strategy_def)
+        self.logger.info(f"\nCosineAlgo - Loading CosineStrategy: [{strat_name}]")
+        self._cxt.strategy = StrategyClass(self._cfg, self._cxt, self._venues, self._worker_pool, logger=self.logger, **strategy_def)
         self._cxt.strategy.setup()
 
 
@@ -165,12 +176,14 @@ class CosineAlgo(object):
 
 
     def _run_on_timer(self):
+        self.logger.info("CosineAlgo - Starting algo on timer...")
         raise NotImplementedError()
 
 
     def _run_on_primary_feed(self):
 
         # get the primary feed...
+        self.logger.info(f"CosineAlgo - Starting algo on primary feed: [{self._cfg.feed.Primary}]")
         primary_feed = self._cxt.feeds[self._cfg.feed.Primary]
 
         # setup the main tick handler with a debounce rate limit call rate...
@@ -184,6 +197,7 @@ class CosineAlgo(object):
     def _tick_main(self):
 
         # update the main loop on a tick...
+        self.logger.debug("CosineAlgo - ** Main loop tick **")
 
         # update aux pricing...
         for k in self._cxt.feeds:

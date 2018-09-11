@@ -15,8 +15,8 @@ from .base_feed import CosineBaseFeed
 # MODULE CLASSES
 class CryptoCompareSocketIOFeed(CosineBaseFeed):
 
-    def __init__(self, name, pool, cxt, **kwargs):
-        super().__init__(name, pool, cxt, **kwargs)
+    def __init__(self, name, pool, cxt, logger=None, **kwargs):
+        super().__init__(name, pool, cxt, logger=logger, **kwargs)
         self._socketio = None
 
 
@@ -73,7 +73,7 @@ class CryptoCompareSocketIOFeed(CosineBaseFeed):
                     data[prop] = float(fields[curr])
                     curr += 1
 
-        instr = data["FROMSYMBOL"] + "/" + data["TOSYMBOL"]
+        instr = str(data["FROMSYMBOL"]) + "/" + str(data["TOSYMBOL"])
         if instr in self._cache:
             cached = self._cache[instr]
             cached.lastmarket = data.get("LASTMARKET", cached.lastmarket)
@@ -103,6 +103,7 @@ class CryptoCompareSocketIOFeed(CosineBaseFeed):
     def _setup(self):
 
         # establish the connection...
+        self.logger.info(f"CryptoCompareSocketIOFeed - Establishing connection: {self.endpoint}")
         self._socketio = SocketIO(self.endpoint, 80)
 
         # subscribe for all instruments...
@@ -110,6 +111,7 @@ class CryptoCompareSocketIOFeed(CosineBaseFeed):
         for n in self._cache:
             instrument = self._cache[n].instrument
             if not isinstance(instrument, CosinePairInstrument): continue
+            self.logger.info(f"CryptoCompareSocketIOFeed - Subscribing for instrument: {instrument.symbol}")
             subs.append('5~CCCAGG~{0}~{1}'.format(instrument.asset.symbol, instrument.ccy.symbol))
 
         self._socketio.emit('SubAdd', {"subs": subs})
@@ -123,6 +125,7 @@ class CryptoCompareSocketIOFeed(CosineBaseFeed):
 
     """Worker process run or inline run"""
     def _on_sio_tick(self, message):
+        self.logger.debug(f"CryptoCompareSocketIOFeed - On Tick: {str(message)}")
         if self._worker:
             self._worker.enqueue_event("OnRawTick", message)
         else:

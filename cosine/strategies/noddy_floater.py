@@ -14,29 +14,36 @@ from .base_strategy import CosineBaseStrategy
 # MODULE CLASSES
 class NoddyFloaterStrategy(CosineBaseStrategy):
 
-    def __init__(self, cfg, cxt, venues, pool, **kwargs):
-        super().__init__(cfg, cxt, venues, pool, **kwargs)
+    def __init__(self, cfg, cxt, venues, pool, logger=None, **kwargs):
+        super().__init__(cfg, cxt, venues, pool, logger=logger, **kwargs)
 
 
     def update(self):
+        self.logger.debug("NoddyFloaterStrategy - ** update **")
 
         # pull instruments...
         bem_workers = self._cxt.orders.bem
         instruments = map(lambda wrkr: wrkr.instrument, bem_workers.values())
 
         # pull prices for instruments...
+        self.logger.debug("NoddyFloaterStrategy - source instrument prices from feed cache...")
         feed = self._cxt.feeds.cryptocompare
         prices = feed.capture_latest_prices(instruments=instruments)
 
         # massage pricing...
         for p in self._cxt.pricer_seq:
+            self.logger.debug(f"NoddyFloaterStrategy - calc pricing: [{p}]")
             prices = self._cxt.pricers[p].generate_theo_prices(instrument_prices=prices)
 
         # update the order quotes...
+        self.logger.debug("NoddyFloaterStrategy - updating quotes...")
         quotes = self._update_quotes(workers=bem_workers, prices=prices)
 
         # update the order workers...
+        self.logger.debug("NoddyFloaterStrategy - updating order workers...")
         self._update_order_workers(workers=bem_workers, quotes=quotes)
+
+        self.logger.debug("NoddyFloaterStrategy - ** update complete **")
 
 
     def _update_quotes(self, workers, prices):

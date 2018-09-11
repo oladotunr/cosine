@@ -7,6 +7,7 @@ __author__ = 'dotun rominiyi'
 
 # IMPORTS
 from decimal import Decimal
+from cosine.core.logger import null_logger
 from cosine.core.config import FieldSet
 from cosine.core.proc_workers import CosineProcEventWorker
 from cosine.core.utils import CosineEventSlot
@@ -29,8 +30,9 @@ class CosineFeedProcWorker(CosineProcEventWorker):
 
 class CosineBaseFeed(object):
 
-    def __init__(self, name, pool, cxt, **kwargs):
+    def __init__(self, name, pool, cxt, logger=None, **kwargs):
         [setattr(self, k, kwargs[k]) for k in kwargs]
+        self.logger = logger if logger else null_logger
         self._feed_name = name
         self._pool = pool
         self._cfg = self._pool.cfg

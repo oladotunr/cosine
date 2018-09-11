@@ -8,6 +8,7 @@ __author__ = 'dotun rominiyi'
 # IMPORTS
 import inspect
 from enum import Enum
+from cosine.core.logger import null_logger
 
 
 # MODULE CLASSES
@@ -159,8 +160,9 @@ class CosineBalanceInfo(object):
 
 class CosineBaseVenue(object):
 
-    def __init__(self, worker_pool, cxt, **kwargs):
+    def __init__(self, worker_pool, cxt, logger=None, **kwargs):
         [setattr(self, k, kwargs[k]) for k in kwargs]
+        self.logger = logger if logger else null_logger
         self._cxt = cxt
         self._pool = worker_pool
 

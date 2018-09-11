@@ -6,13 +6,15 @@
 __author__ = 'dotun rominiyi'
 
 # IMPORTS
+from cosine.core.logger import null_logger
 
 
 # MODULE CLASSES
 class CosinePricer(object):
 
-    def __init__(self, name, pool, cxt, **kwargs):
+    def __init__(self, name, pool, cxt, logger=None, **kwargs):
         [setattr(self, k, kwargs[k]) for k in kwargs]
+        self.logger = logger if logger else null_logger
         self.name = name
         self._pool = pool
         self._cxt = cxt

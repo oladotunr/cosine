@@ -13,7 +13,7 @@ import logging
 # MODULE LOGGER
 logger = None
 
-# MODULE CLASSES
+# MODULE FUNCTIONS
 def create_logger(args):
     appname = args.get("appname", os.environ.get("COSINE_APP", "cosine"))
     env = args.get("env", os.environ.get("COSINE_ENV", "DEV"))
@@ -29,3 +29,30 @@ def create_logger(args):
     _logger.addHandler(fh)
     globals()["logger"] = _logger
     return _logger
+
+# MODULE CLASSES
+class NullLogger(object):
+
+    def debug(self, *args, **kwargs):
+        pass
+
+    def info(self, *args, **kwargs):
+        pass
+
+    def warn(self, *args, **kwargs):
+        pass
+
+    def warning(self, *args, **kwargs):
+        pass
+
+    def error(self, *args, **kwargs):
+        pass
+
+    def critical(self, *args, **kwargs):
+        pass
+
+    def fatal(self, *args, **kwargs):
+        pass
+
+
+null_logger = NullLogger()

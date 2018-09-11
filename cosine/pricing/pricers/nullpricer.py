@@ -12,8 +12,8 @@ from .base_pricer import CosinePricer
 # MODULE CLASSES
 class NullPricer(CosinePricer):
 
-    def __init__(self, name, pool, cxt, **kwargs):
-        super().__init__(name, pool, cxt, **kwargs)
+    def __init__(self, name, pool, cxt, logger=None, **kwargs):
+        super().__init__(name, pool, cxt, logger=logger, **kwargs)
 
 
     def setup(self):

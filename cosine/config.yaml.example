@@ -1,6 +1,9 @@
 system:
     EventLoop: feed
     EventLoopThrottle: 0.16 # secs
+    network:
+        ssl:
+            CertFile: dd
 
 orders:
     ActiveDepth: 10

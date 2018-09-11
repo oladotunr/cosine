@@ -15,8 +15,13 @@ from argparse import Namespace
 # MODULE CLASSES
 class FieldSet(Namespace):
 
-    def get(self, key, default=None):
-        return getattr(self, key, default)
+    def get(self, key, default=None, split=True):
+        parts = key.split(".") if split else [key]
+        target = self
+        while len(parts) > 0 and target:
+            k = parts.pop(0)
+            target = getattr(target, k, None)
+        return target if target else default
 
 
     def __getitem__(self, key):
@@ -25,8 +30,26 @@ class FieldSet(Namespace):
         raise IndexError("No attribute found at index: "+key)
 
 
+    def __setitem__(self, key, value):
+        setattr(self, key, value)
+
+
+    def __delitem__(self, key):
+        if hasattr(self, key):
+            delattr(self, key)
+        raise IndexError("No attribute found at index: "+key)
+
+
     def keys(self):
         return self.__dict__.keys()
+
+
+    def asdict(self):
+        return self.__dict__
+
+
+    def items(self):
+        return self.__dict__.items()
 
 
 class Section(FieldSet):
@@ -42,7 +65,6 @@ class Config(Section):
 
 
     def load(self, file_path=None, stream=None):
-
         if file_path and os.path.exists(file_path):
             with open(file_path, "r") as fp:
                 raw_cfg = yaml.safe_load(fp)
@@ -54,6 +76,20 @@ class Config(Section):
         for k in raw_cfg:
             val = Config.cvn(raw_cfg.get(k, self.get(k)))
             setattr(self, k, val)
+
+
+    def log_config(self, logger):
+        logger.info("Config - loaded:")
+        def log_attr(k, v, t=None):
+            if isinstance(v, Section):
+                for (sk, sv) in v.items():
+                    log_attr(sk, sv, (t+[k]) if t else None)
+            else:
+                if t:
+                    k = (t+[k]).join(".")
+                logger.info(f"Config -     [{k}]: [ {v} ]")
+        for (key, val) in self.items():
+            log_attr(key, val)
 
 
     @staticmethod

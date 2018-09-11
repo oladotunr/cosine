@@ -10,9 +10,9 @@ from datetime import datetime, timedelta
 from enum import Enum
 from decimal import Decimal
 from cosine.core.config import FieldSet as Pos
-from cosine.core.logger import logger
+from cosine.core.logger import null_logger
 from cosine.core.utils import epsilon_equals
-from cosine.core.order_worker_types import PendingAction
+from cosine.core.order_worker_types import PendingAction, LostControlError
 from cosine.venues.base_venue import AsyncEvents, OrderType, OfferType, OrderStatus
 
 
@@ -30,7 +30,8 @@ def empty_pos(price=Decimal(0.0)):
 # MODULE CLASSES
 class CosineOrderWorker(object):
 
-    def __init__(self, active_depth, instrument, venue):
+    def __init__(self, active_depth, instrument, venue, logger=None):
+        self.logger = logger if logger else null_logger
         self._depth = active_depth
         self._venue = venue
         self._instr = instrument
@@ -82,7 +83,7 @@ class CosineOrderWorker(object):
             [self.update_level(OfferType.Ask, empty_pos(price=currask.price), currask) for currask in removals]
 
         except LostControlError as err:
-            logger.error(err)
+            self.logger.error(err)
             self.pull_all()
 
 
@@ -144,7 +145,7 @@ class CosineOrderWorker(object):
         can_commit = available >= required
         if not can_commit:
             asset = self._instr.asset if side == OfferType.Bid else self._instr.ccy
-            logger.warning("CosineOrderWorker - [{0}|{1}] Insufficient inventory - (has: {2}, requires: {3})".format(
+            self.logger.warning("CosineOrderWorker - [{0}|{1}] Insufficient inventory - (has: {2}, requires: {3})".format(
                 self._venue.name,
                 asset.symbol,
                 available,
@@ -286,7 +287,7 @@ class CosineOrderWorker(object):
         try:
             self.synchronise()
         except LostControlError as err:
-            logger.error(err)
+            self.logger.error(err)
             self.pull_all()
 
 

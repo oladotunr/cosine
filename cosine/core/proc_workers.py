@@ -93,7 +93,7 @@ class CosineProcWorkers(object):
     def start(self, workers, context=None, kwargs=None):
         pids = []
         for worker in workers:
-            if type(worker) is mp.Process:
+            if isinstance(worker, mp.Process):
                 worker.args = (self.cfg, context)
                 worker.kwargs = kwargs
                 p = worker

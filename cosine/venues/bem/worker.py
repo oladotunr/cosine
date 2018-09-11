@@ -7,12 +7,15 @@ __author__ = 'dotun rominiyi'
 
 # IMPORTS
 import ujson
+import ssl
+import websockets
 
 from base64 import b64decode
 from zlib import decompress, MAX_WBITS
+from signalr_aio.transports import Transport as SignalRTransport
 from signalr_aio import Connection as SignalRConnection
 
-from cosine.core.proc_workers import CosineProcWorkers, CosineProcEventWorker
+from cosine.core.proc_workers import CosineProcEventWorker
 from cosine.venues.base_venue import AsyncEvents
 from cosine.venues.bem.types import (
     BlockExMarketsAsyncOrder,
@@ -40,12 +43,37 @@ class BlockExMarketsSignalRWorker(CosineProcEventWorker):
         self.events.OnError = CosineProcEventWorker.EventSlot()
 
 
+    """Worker process websockets setup"""
+    def _setup_websockets_ssl_certs(self):
+        cert_file = self.kwargs["CertFile"]
+
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+        context.load_verify_locations(cert_file)
+
+        # monkeypatch the transport to let us connect via a custom SSLContext
+        async def socket(this, loop):
+            async with websockets.connect(
+                this._ws_params.socket_url,
+                extra_headers=this._ws_params.headers,
+                loop=loop,
+                ssl=context
+            ) as this.ws:
+                this._connection.started = True
+                await this.handler(this.ws)
+
+        SignalRTransport.socket = socket
+
+
     """Worker process setup"""
     def run(self):
 
+        # setup SSL context construction if required
+        if self.kwargs["CertFile"]:
+            self._setup_websockets_ssl_certs()
+
         # setup SignalR connection (w/ authentication)
-        connection = SignalRConnection(f"{self.kwargs.APIDomain}/signalr", session=None)
-        connection.qs = {'access_token': self.kwargs.access_token}
+        connection = SignalRConnection(f"{self.kwargs['APIDomain']}/signalr", session=None)
+        connection.qs = {'access_token': self.kwargs['access_token']}
 
         hub = connection.register_hub('TradingHub')
 
@@ -68,7 +96,8 @@ class BlockExMarketsSignalRWorker(CosineProcEventWorker):
 
     """Worker process teardown"""
     def join(self, timeout=None):
-        self._connection.close()
+        if self._connection:
+            self._connection.close()
 
 
     """Worker process raw message processors"""
@@ -84,7 +113,7 @@ class BlockExMarketsSignalRWorker(CosineProcEventWorker):
 
 
     """Worker process raw message received"""
-    async def on_raw_msg_received(self, msg):
+    async def on_raw_msg_received(self, **msg):
         if 'R' in msg and type(msg['R']) is not bool:
             if self._responder:
                 msg = BlockExMarketsSignalRWorker.process_raw_msg(msg['R'])
@@ -93,7 +122,7 @@ class BlockExMarketsSignalRWorker(CosineProcEventWorker):
 
 
     """Worker process error received"""
-    async def on_error_received(self, msg):
+    async def on_error_received(self, **msg):
         self.enqueue_event(AsyncEvents.OnError, msg)
 
 
