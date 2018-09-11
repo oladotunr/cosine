@@ -74,7 +74,7 @@ class CosineAlgo(object):
         venue_defs = self._cfg.get("venues", {})
         venue_names = venue_defs.keys()
         venues = collate_venues(venue_names)
-        self.logger.info("\nCosineAlgo - venues:")
+        self.logger.info("CosineAlgo - venues:")
         for k in venue_names:
             self.logger.info(f"CosineAlgo -     Loading venue: [{k}]")
             VenueClass = venues[k]
@@ -86,7 +86,7 @@ class CosineAlgo(object):
         self._cxt.orders = FieldSet()
         venue_names = self._cfg.get("venues", {}).keys()
         instr_names = self._cfg.get("instruments", {})
-        self.logger.info("\nCosineAlgo - instruments:")
+        self.logger.info("CosineAlgo - instruments:")
         for k in venue_names:
             self._cxt.orders[k] = {}
             venue = self._venues[k]
@@ -105,7 +105,7 @@ class CosineAlgo(object):
         feed_defs = self._cfg.get("feeds", {})
         feed_names = feed_defs.keys()
         feeds = collate_feeds(feed_names)
-        self.logger.info("\nCosineAlgo - feeds:")
+        self.logger.info("CosineAlgo - feeds:")
         for k in feeds:
             self.logger.info(f"CosineAlgo -     Loading feed: [{k}]")
             PricingFeedClass = feeds[k]
@@ -119,7 +119,7 @@ class CosineAlgo(object):
         pricer_defs = self._cfg.get("pricers", {}).get("settings", {})
         pricers = collate_pricers(pricer_names)
         self._cxt.pricer_seq = pricer_names
-        self.logger.info("\nCosineAlgo - pricers:")
+        self.logger.info("CosineAlgo - pricers:")
         for k in pricers:
             self.logger.info(f"CosineAlgo -     Loading pricer: [{k}]")
             PricerClass = pricers[k]
@@ -134,7 +134,7 @@ class CosineAlgo(object):
         StrategyClass = locate_strategy(strat_name)
         if not StrategyClass:
             raise ValueError("Failed to identify a valid strategy")
-        self.logger.info(f"\nCosineAlgo - Loading CosineStrategy: [{strat_name}]")
+        self.logger.info(f"CosineAlgo - Loading CosineStrategy: [{strat_name}]")
         self._cxt.strategy = StrategyClass(self._cfg, self._cxt, self._venues, self._worker_pool, logger=self.logger, **strategy_def)
         self._cxt.strategy.setup()
 
