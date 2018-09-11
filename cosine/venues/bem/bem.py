@@ -229,7 +229,7 @@ class BlockExMarketsVenue(CosineBaseVenue):
     def to_TradeAPI_OfferType(t):
         return {
             OfferType.Bid: interface.OfferType.BID,
-            OrderType.Ask: interface.OfferType.ASK,
+            OfferType.Ask: interface.OfferType.ASK,
         }[t]
 
 
