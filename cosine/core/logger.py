@@ -18,15 +18,26 @@ def create_logger(args):
     appname = args.get("appname", os.environ.get("COSINE_APP", "cosine"))
     env = args.get("env", os.environ.get("COSINE_ENV", "DEV"))
     log_file = args.get("logfile", os.environ.get("COSINE_LOGFILE", "{0}.{1}.{2}.log".format(appname, env, os.getpid())))
-    log_level = args.get("loglevel", os.environ.get("COSINE_LOGLVL", "INFO"))
+    log_level = logging._nameToLevel[ args.get("loglevel", os.environ.get("COSINE_LOGLVL", "INFO")) ]
 
+    # create the logger...
     _logger = logging.getLogger(appname)
-    _logger.setLevel(logging._nameToLevel[log_level])
+    _logger.setLevel(log_level)
+
+    # add a file handler...
     fh = logging.FileHandler(log_file)
-    fh.setLevel(logging._nameToLevel[log_level])
+    fh.setLevel(log_level)
     formatter = logging.Formatter('[%(asctime)s][%(thread)d][%(levelname)s]: %(message)s')
     fh.setFormatter(formatter)
     _logger.addHandler(fh)
+
+    # add a stream handler...
+    sh = logging.StreamHandler()
+    sh.setLevel(log_level)
+    sh.setFormatter(formatter)
+    logger.addHandler(sh)
+
+    # set the logger to module scope variable for universal access...
     globals()["logger"] = _logger
     return _logger
 
