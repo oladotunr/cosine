@@ -26,21 +26,18 @@ class CosineInstrument(CosineTradableAsset):
 
 
     @staticmethod
-    def load(cache, instr_def):
-        if instr_def.symbol in cache:
-            return cache[instr_def.symbol]
+    def load(cache, **instr_def):
+        if instr_def['symbol'] in cache:
+            return cache[instr_def['symbol']]
 
         if not ("_instr_classes" in cache):
             current_module = sys.modules[__name__]
-            instrument_classes = {
-                cls.__name__: cls for cls in inspect.getmembers(current_module, inspect.isclass) if
-                isinstance(cls, type) and issubclass(cls, CosineTradableAsset)
-            }
+            instrument_classes = current_module.__dict__
             cache["_instr_classes"] = instrument_classes
         else:
             instrument_classes = cache["_instr_classes"]
 
-        InstrumentClass = instrument_classes[instr_def.get("cls", "CosineInstrument")]
+        InstrumentClass = instrument_classes[instr_def.get("cls", "CosinePairInstrument")]
         return InstrumentClass(cache=cache, **instr_def)
 
 

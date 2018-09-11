@@ -30,11 +30,15 @@ class CosineTradableAsset(object):
 
     @property
     def symbol(self):
-        return self._symbology.base_symbol
+        return self._symbology.symbol
 
     @property
     def symbology(self):
         return self._symbology
+
+    @property
+    def venue_id(self):
+        return self._symbology.venue_id
 
 
 class CosineSymbology:
