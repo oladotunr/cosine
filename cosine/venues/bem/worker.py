@@ -26,13 +26,23 @@ from cosine.venues.bem.types import (
 
 
 # MODULE CLASSES
+class BlockExMarketsSignalRConnection(SignalRConnection):
+
+    def __init__(self, url, session=None):
+        super().__init__(url, session=session)
+
+    @property
+    def last_send_id(self):
+        return self.__send_counter
+
+
 class BlockExMarketsSignalRWorker(CosineProcEventWorker):
 
     def __init__(self, group=None, target=None, name=None, args=(), kwargs={}):
         super().__init__(group, target, name, args, kwargs)
         self._hub = None
         self._connection = None
-        self._responder = None
+        self._invoke_handling = {}
         self.events.OnPlaceOrder = CosineProcEventWorker.EventSlot()
         self.events.OnExecution = CosineProcEventWorker.EventSlot()
         self.events.OnCancelOrder = CosineProcEventWorker.EventSlot()
@@ -72,7 +82,7 @@ class BlockExMarketsSignalRWorker(CosineProcEventWorker):
             self._setup_websockets_ssl_certs()
 
         # setup SignalR connection (w/ authentication)
-        connection = SignalRConnection(f"{self.kwargs['APIDomain']}/signalr", session=None)
+        connection = BlockExMarketsSignalRConnection(f"{self.kwargs['APIDomain']}/signalr", session=None)
         connection.qs = {'access_token': self.kwargs['access_token']}
 
         hub = connection.register_hub('TradingHub')
@@ -112,13 +122,22 @@ class BlockExMarketsSignalRWorker(CosineProcEventWorker):
         return ujson.loads(raw_msg)
 
 
+    """Worker process server invocation handling"""
+    def invoke(self, method, *data, callback=None):
+        inv_id = self._connection.last_send_id + 1
+        self._invoke_handling[inv_id] = {"cb": callback, "a": (method, data)}
+        self._hub.server.invoke(method, *data)
+        return inv_id
+
+
     """Worker process raw message received"""
     async def on_raw_msg_received(self, **msg):
-        if 'R' in msg and type(msg['R']) is not bool:
-            if self._responder:
+        inv_id = msg['I']
+        h = self._invoke_handling.get(inv_id)
+        if h:
+            if 'R' in msg and type(msg['R']) is not bool:
                 msg = BlockExMarketsSignalRWorker.process_raw_msg(msg['R'])
-                self._responder(msg)
-                self._responder = None
+            h["cb"](msg, h["a"])
 
 
     """Worker process error received"""
@@ -128,20 +147,22 @@ class BlockExMarketsSignalRWorker(CosineProcEventWorker):
 
     """Worker process market tick received"""
     async def on_market_tick_received(self, msg):
-        self._responder = self.on_bids_received
-        self._hub.server.invoke("getBids", self.kwargs['APIID'], msg['instrumentID'])
+        self.invoke("getBids", self.kwargs['APIID'], msg[0]['instrumentID'], callback=self.on_bids_received)
 
 
     """Worker process market tick received"""
-    async def on_bids_received(self, msg):
-        self.enqueue_event('OnLatestBids', msg)
-        self._responder = self.on_asks_received
-        self._hub.server.invoke("getAsks", self.kwargs['APIID'], msg['instrumentID'])
+    async def on_bids_received(self, bids_msg, req):
+        (_, msg) = req
+        bids_msg['instrumentID'] = msg[0]['instrumentID']
+        self.enqueue_event('OnLatestBids', bids_msg)
+        self.invoke("getAsks", self.kwargs['APIID'], msg[0]['instrumentID'], callback=self.on_asks_received)
 
 
     """Worker process market tick received"""
-    async def on_asks_received(self, msg):
-        self.enqueue_event('OnLatestAsks', msg)
+    async def on_asks_received(self, asks_msg, req):
+        (_, msg) = req
+        asks_msg['instrumentID'] = msg[0]['instrumentID']
+        self.enqueue_event('OnLatestAsks', asks_msg)
 
 
     """Worker process place order response received"""
