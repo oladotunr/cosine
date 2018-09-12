@@ -216,21 +216,22 @@ class BlockExMarketsVenue(CosineBaseVenue):
             CertFile=self.CertFile
         )
 
-
     @staticmethod
     def to_TradeAPI_OrderType(t):
         return {
             OrderType.Limit: interface.OrderType.LIMIT,
             OrderType.Market: interface.OrderType.MARKET,
             OrderType.Stop: interface.OrderType.STOP,
-        }[t]
+            None: None
+        }.get(t)
 
     @staticmethod
     def to_TradeAPI_OfferType(t):
         return {
             OfferType.Bid: interface.OfferType.BID,
             OfferType.Ask: interface.OfferType.ASK,
-        }[t]
+            None: None
+        }.get(t)
 
 
     @property
