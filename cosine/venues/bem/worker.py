@@ -13,7 +13,7 @@ import websockets
 from base64 import b64decode
 from zlib import decompress, MAX_WBITS
 from signalr_aio.transports import Transport as SignalRTransport
-from signalr_aio import Connection as SignalRConnection
+from signalr_aio import Connection
 
 from cosine.core.proc_workers import CosineProcEventWorker
 from cosine.venues.base_venue import AsyncEvents
@@ -26,7 +26,7 @@ from cosine.venues.bem.types import (
 
 
 # MODULE CLASSES
-class BlockExMarketsSignalRConnection(SignalRConnection):
+class BlockExMarketsSignalRConnection(Connection):
 
     def __init__(self, url, session=None):
         super().__init__(url, session=session)
