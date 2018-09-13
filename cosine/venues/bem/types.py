@@ -130,8 +130,8 @@ class BlockExMarketsBalanceInfo(CosineBalanceInfo):
             if not (instr.asset.symbol in self._balances) and instr.asset.name in self._balances:
                 self._balances[instr.asset.symbol] = self._balances[instr.asset.name]
 
-            if not (instr.ccy.symbol in self._balances) and instr.ccy.name in self._balances:
-                self._balances[instr.ccy.symbol] = self._balances[instr.ccy.name]
+            if not (instr.quote_ccy.symbol in self._balances) and instr.quote_ccy.name in self._balances:
+                self._balances[instr.quote_ccy.symbol] = self._balances[instr.quote_ccy.name]
 
     @property
     def balances(self):
