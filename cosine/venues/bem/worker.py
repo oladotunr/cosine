@@ -91,6 +91,7 @@ class BlockExMarketsSignalRWorker(CosineProcEventWorker):
         self._connection = connection
 
         # Set event handlers
+        hub.client.on('MarketTradesRefreshed', lambda x: None)
         hub.client.on('MarketOrdersRefreshed', self.on_market_tick_received)
         hub.client.on('tradeCreated', self.on_execution_received)
         hub.client.on('createTradeOrderResult', self.on_place_order_received)
@@ -132,6 +133,7 @@ class BlockExMarketsSignalRWorker(CosineProcEventWorker):
 
     """Worker process raw message received"""
     async def on_raw_msg_received(self, **msg):
+        if not ('I' in msg): return
         inv_id = msg['I']
         h = self._invoke_handling.get(inv_id)
         if h:

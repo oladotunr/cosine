@@ -170,11 +170,12 @@ class BlockExMarketsVenue(CosineBaseVenue):
 
 
     def get_open_orders(self, instrument, order_type=None, offer_type=None, max_count=100):
+        OS = interface.OrderStatus
         orders = self.trade_api.get_orders(
             instrument_id=instrument.venue_id,
             order_type=BlockExMarketsVenue.to_TradeAPI_OrderType(order_type),
             offer_type=BlockExMarketsVenue.to_TradeAPI_OfferType(offer_type),
-            status=[10,20,50],
+            status=[OS.PENDING, OS.PLACED, OS.PARTEXECUTED],
             max_count=max_count
         )
         return map(lambda msg: BlockExMarketsOrder(api_msg=msg), orders)
