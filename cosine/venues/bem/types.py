@@ -129,9 +129,13 @@ class BlockExMarketsBalanceInfo(CosineBalanceInfo):
         for instr in self._instruments:
             if not (instr.asset.symbol in self._balances) and instr.asset.name in self._balances:
                 self._balances[instr.asset.symbol] = self._balances[instr.asset.name]
+            elif not (instr.asset.symbol in self._balances) and instr.asset.symbology['name'] in self._balances:
+                self._balances[instr.asset.symbol] = self._balances[instr.asset.symbology['name']]
 
             if not (instr.quote_ccy.symbol in self._balances) and instr.quote_ccy.name in self._balances:
                 self._balances[instr.quote_ccy.symbol] = self._balances[instr.quote_ccy.name]
+            elif not (instr.quote_ccy.symbol in self._balances) and instr.quote_ccy.symbology['name'] in self._balances:
+                self._balances[instr.quote_ccy.symbol] = self._balances[instr.quote_ccy.symbology['name']]
 
     @property
     def balances(self):

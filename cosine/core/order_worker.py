@@ -176,8 +176,8 @@ class CosineOrderWorker(object):
     def balance_sync(self):
         balance_info = self._venue.get_inventory()
         self._balances = {
-            OfferType.Ask: balance_info[self._instr.ccy.symbol],
-            OfferType.Bid: balance_info[self._instr.asset.symbol]
+            OfferType.Ask: balance_info.balances[self._instr.ccy.symbol],
+            OfferType.Bid: balance_info.balances[self._instr.asset.symbol]
         }
 
 

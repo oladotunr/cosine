@@ -26,7 +26,7 @@ from cosine.venues.bem.types import (
 
 
 # MODULE FUNCTIONS
-setattr(SignalRConnection, 'last_send_id', property(lambda self: self.__send_counter))
+setattr(SignalRConnection, 'last_send_id', property(lambda self: self._Connection__send_counter))
 
 
 # MODULE CLASSES
@@ -76,7 +76,7 @@ class BlockExMarketsSignalRWorker(CosineProcEventWorker):
             self._setup_websockets_ssl_certs()
 
         # setup SignalR connection (w/ authentication)
-        connection = BlockExMarketsSignalRConnection(f"{self.kwargs['APIDomain']}/signalr", session=None)
+        connection = SignalRConnection(f"{self.kwargs['APIDomain']}/signalr", session=None)
         connection.qs = {'access_token': self.kwargs['access_token']}
 
         hub = connection.register_hub('TradingHub')
