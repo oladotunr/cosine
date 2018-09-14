@@ -24,7 +24,7 @@ instruments:
 feeds:
     cryptocompare:
         type: stream
-        endpoint: wss://streamer.cryptocompare.com/
+        endpoint: https://streamer.cryptocompare.com
         port: 443
         framework: socket.io
         instruments:

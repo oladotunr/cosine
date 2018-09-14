@@ -83,10 +83,9 @@ class Config(Section):
         def log_attr(k, v, t=None):
             if isinstance(v, Section):
                 for (sk, sv) in v.items():
-                    log_attr(sk, sv, (t+[k]) if t else None)
+                    log_attr(sk, sv, (t+[k]) if t else [k])
             else:
-                if t:
-                    k = (t+[k]).join(".")
+                k = ".".join(t+[k] if t else [k])
                 logger.info(f"Config -     [{k}]: [ {v} ]")
         for (key, val) in self.items():
             log_attr(key, val)
