@@ -73,9 +73,9 @@ class CosineBaseFeed(object):
     def _init_pricing_cache(self):
         instruments = self.instruments
         for instr_name in instruments:
-            if not (instr_name in self._cxt.instruments): continue
-            instrument = self._cxt.instruments[instr_name]
-            self._cache[instr_name] = FieldSet(
+            instrument = self._cxt.find_instrument(term=instr_name)
+            if not instrument: continue
+            self._cache[instrument.name] = FieldSet(
                 instrument=instrument,
                 lastmarket=None,
                 lasttradedmid=Decimal(0.0),

@@ -6,7 +6,7 @@
 __author__ = 'dotun rominiyi'
 
 # IMPORTS
-
+from cosine.core.utils import find_instrument
 
 
 # MODULE CLASSES
@@ -19,3 +19,7 @@ class CosineCoreContext(object):
         self.strategy = None
         self.orders = None
         self.instruments = {}
+
+
+    def find_instrument(self, term):
+        return find_instrument(self.instruments, term=term)

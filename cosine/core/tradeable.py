@@ -46,3 +46,15 @@ class CosineSymbology:
     def __init__(self, instr_attrs, **kwargs):
         [setattr(self, k, kwargs[k]) for k in kwargs]
         self.attrs = instr_attrs
+
+
+    def match(self, term):
+        for attr in self.attrs.values():
+            if type(term) is type(attr) and term == attr:
+                return True
+
+        for k, v in self.__dict__.items():
+            if k == 'attrs': continue
+            if type(term) is type(v) and term == v:
+                return True
+        return False

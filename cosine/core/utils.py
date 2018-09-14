@@ -17,6 +17,14 @@ def epsilon_equals(x, y):
     return abs(x - y) <= flt.epsilon
 
 
+def find_instrument(instruments, term):
+    instruments = (instruments.values() if isinstance(instruments, dict) else instruments)
+    for instr in instruments:
+        if instr.symbology.match(term):
+            return instr
+    return None
+
+
 # DECORATORS
 def debounce(wait):
     """ Decorator that will postpone a functions
