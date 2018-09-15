@@ -22,12 +22,12 @@ class NoddyFloaterStrategy(CosineBaseStrategy):
         self.logger.debug("NoddyFloaterStrategy - ** update **")
 
         # pull instruments...
-        bem_workers = self._cxt.orders.bem
+        bem_workers = self._cxt.orders['cosine.venues.bem']
         instruments = map(lambda wrkr: wrkr.instrument, bem_workers.values())
 
         # pull prices for instruments...
         self.logger.debug("NoddyFloaterStrategy - source instrument prices from feed cache...")
-        feed = self._cxt.feeds.cryptocompare
+        feed = self._cxt.feeds['cosine.pricing.cryptocompare']
         prices = feed.capture_latest_prices(instruments=instruments)
 
         # massage pricing...

@@ -24,6 +24,10 @@ class FieldSet(Namespace):
         return target if target else default
 
 
+    def __iter__(self):
+        return iter(self.__dict__)
+
+
     def __getitem__(self, key):
         if hasattr(self, key):
             return getattr(self, key)

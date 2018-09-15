@@ -9,7 +9,7 @@ orders:
     ActiveDepth: 10
 
 venues:
-    bem:
+    cosine.venues.bem:
         Username: BEMUser123
         Password: BEMUserPWD123!
         APIDomain: dd
@@ -22,7 +22,7 @@ instruments:
 - "ETH4/EUR"
 
 feeds:
-    cryptocompare:
+    cosine.pricing.cryptocompare:
         type: stream
         endpoint: https://streamer.cryptocompare.com
         port: 443
@@ -37,18 +37,18 @@ feeds:
                 Ticker: "ETH"
                 BaseCCY: "ETH"
 feed:
-    Primary: cryptocompare
+    Primary: cosine.pricing.cryptocompare
 
 pricers:
-    Default: nullpricer
+    Default: cosine.pricing.pricers.nullpricer
     settings:
-        nullpricer:
+        cosine.pricing.pricers.nullpricer:
             nop: nop
 
 strategy:
-    type: noddy_floater
+    type: cosine.strategies.noddy_floater
     settings:
-        noddy_floater:
+        cosine.strategies.noddy_floater:
             Spread: 0.20
             MaxSpread: 0.5
             instrument_settings:

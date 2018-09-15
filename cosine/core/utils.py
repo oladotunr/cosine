@@ -88,6 +88,6 @@ class CosineEventSlot(object):
         self._handlers.remove(handler)
         return self
 
-    async def fire(self, *args, **kwargs):
+    def fire(self, *args, **kwargs):
         for handler in self._handlers:
             handler(*args, **kwargs)
