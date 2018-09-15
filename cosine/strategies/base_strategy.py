@@ -6,6 +6,7 @@
 __author__ = 'dotun rominiyi'
 
 # IMPORTS
+from cosine.core.utils import find_by_instrument, find_instrument
 from cosine.core.logger import null_logger
 
 
@@ -31,4 +32,11 @@ class CosineBaseStrategy(object):
 
     def update(self):
         raise NotImplementedError()
+
+
+    def find_instrument(self, instruments, term):
+        return find_instrument(instruments, term=term)
+
+    def find_by_instrument(self, instr_data, instr):
+        return find_by_instrument(instr_data, instr=instr)
 

@@ -24,6 +24,12 @@ def find_instrument(instruments, term):
             return instr
     return None
 
+def find_by_instrument(instr_data, instr):
+    for term in instr_data:
+        if instr.symbology.match(term):
+            return instr_data[term]
+    return None
+
 
 # DECORATORS
 def debounce(wait):

@@ -73,8 +73,11 @@ class CosineBaseFeed(object):
     def _init_pricing_cache(self):
         instruments = self.instruments
         for instr_name in instruments:
+            instr_feed_data = instruments.get(instr_name)
             instrument = self._cxt.find_instrument(term=instr_name)
             if not instrument: continue
+            if instr_feed_data:
+                instrument.symbology.attrs[self._feed_name] = instr_feed_data
             self._cache[instrument.name] = FieldSet(
                 instrument=instrument,
                 lastmarket=None,

@@ -28,9 +28,14 @@ feeds:
         port: 443
         framework: socket.io
         instruments:
-        - "XTN/EUR"
-        - "RCC/Euro"
-        - "ETH4/EUR"
+            "XTN/EUR":
+                Ticker: "XRP"
+                BaseCCY: "BTC"
+            "RCC/Euro":
+                BaseCCY: "ETH"
+            "ETH4/EUR":
+                Ticker: "ETH"
+                BaseCCY: "ETH"
 feed:
     Primary: cryptocompare
 
@@ -47,6 +52,12 @@ strategy:
             Spread: 0.20
             MaxSpread: 0.5
             instrument_settings:
-                "DAXT/EUR":
+                "XTN/EUR":
+                    MinVol: 5
+                    MaxVol: 10
+                "RCC/Euro":
+                    MinVol: 5
+                    MaxVol: 10
+                "ETH4/EUR":
                     MinVol: 5
                     MaxVol: 10

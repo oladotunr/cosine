@@ -51,7 +51,7 @@ class NoddyFloaterStrategy(CosineBaseStrategy):
         instr_settings = self.instrument_settings
         for instr in prices:
             worker = workers[instr.symbol]
-            stg = instr_settings.get(instr.symbol, {})
+            stg = self.find_by_instrument(instr_settings, instr=instr)
             px_info = prices[instr]
             mid_price = px_info.midprice
             spread = self.Spread

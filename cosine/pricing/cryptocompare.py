@@ -101,7 +101,11 @@ class CryptoCompareSocketIOFeed(CosineBaseFeed):
         , 'LASTMARKET': 0x40000
         }
         fields = msg.split('~')
-        mask = int(fields[-1], 16)
+        try:
+            mask = int(fields[-1], 16)
+        except:
+            self.logger.warn("Failed to decode price feed data: {0}".format(msg))
+            return
         fields = fields[:-1]
         curr = 0
         data = {}
@@ -155,8 +159,16 @@ class CryptoCompareSocketIOFeed(CosineBaseFeed):
         for n in self._cache:
             instrument = self._cache[n].instrument
             if not isinstance(instrument, CosinePairInstrument): continue
-            self.logger.info(f"CryptoCompareSocketIOFeed - Subscribing for instrument: {instrument.symbol}")
-            subs.append('5~CCCAGG~{0}~{1}'.format(instrument.asset.symbol, instrument.ccy.symbol))
+
+            # handle any ticker remapping required for this pricing feed...
+            feed_data = instrument.symbology.attrs.get(self._feed_name, {})
+            ticker = feed_data.get('Ticker', instrument.asset.symbol)
+
+            # handle any triangulation via a base currency required...
+
+            # now add the ticker for subscription...
+            self.logger.info(f"CryptoCompareSocketIOFeed - Subscribing for instrument: {instrument.symbol} (via {ticker})")
+            subs.append('5~CCCAGG~{0}~{1}'.format(ticker, instrument.ccy.symbol))
 
         self._socketio.emit('SubAdd', {"subs": subs})
         self._socketio.on('m', self._on_sio_tick)
