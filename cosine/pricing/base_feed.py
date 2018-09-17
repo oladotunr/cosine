@@ -81,7 +81,7 @@ class CosineBaseFeed(object):
             self._cache[instrument.name] = FieldSet(
                 instrument=instrument,
                 lastmarket=None,
-                lasttradedmid=Decimal(0.0),
+                lasttraded=Decimal(0.0),
                 midprice=Decimal(0.0),
                 bid=Decimal(0.0),
                 offer=Decimal(0.0),
@@ -93,7 +93,7 @@ class CosineBaseFeed(object):
                 highday=Decimal(0.0),
                 lowday=Decimal(0.0),
                 lasttradedvol=Decimal(0.0),
-                lasttradedccy=Decimal(0.0),
+                lasttradedvolccy=Decimal(0.0),
                 dayvol=Decimal(0.0),
                 dayvolccy=Decimal(0.0)
             )

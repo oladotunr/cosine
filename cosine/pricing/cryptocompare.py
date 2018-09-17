@@ -126,7 +126,7 @@ class CryptoCompareSocketIOFeed(CosineBaseFeed):
         if instrument.name in self._cache:
             cached = self._cache[instrument.name]
             cached.lastmarket = data.get("LASTMARKET", cached.lastmarket)
-            cached.midprice = Decimal(data.get("PRICE", cached.lasttraded))
+            cached.midprice = Decimal(data.get("PRICE", cached.midprice))
             cached.openhour = Decimal(data.get("OPENHOUR", cached.openhour))
             cached.highhour = Decimal(data.get("HIGHHOUR", cached.highhour))
             cached.lowhour = Decimal(data.get("LOWHOUR", cached.lowhour))
