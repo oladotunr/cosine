@@ -160,8 +160,9 @@ class CosineBalanceInfo(object):
 
 class CosineBaseVenue(object):
 
-    def __init__(self, worker_pool, cxt, logger=None, **kwargs):
+    def __init__(self, name, worker_pool, cxt, logger=None, **kwargs):
         [setattr(self, k, kwargs[k]) for k in kwargs]
+        self.name = name
         self.logger = logger if logger else null_logger
         self._cxt = cxt
         self._pool = worker_pool

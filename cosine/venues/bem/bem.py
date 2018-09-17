@@ -42,8 +42,8 @@ def get_quote_currencies(self):
 # MODULE CLASSES
 class BlockExMarketsVenue(CosineBaseVenue):
 
-    def __init__(self, worker_pool, cxt, logger=None, **kwargs):
-        super().__init__(worker_pool, cxt, logger=logger, **kwargs)
+    def __init__(self, name, worker_pool, cxt, logger=None, **kwargs):
+        super().__init__(name, worker_pool, cxt, logger=logger, **kwargs)
         self._currencies = None
         self._instruments = None
         self.trade_api = None

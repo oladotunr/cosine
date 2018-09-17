@@ -78,7 +78,7 @@ class CosineAlgo(object):
         for k in venue_names:
             self.logger.info(f"CosineAlgo -     Loading venue: [{k}]")
             VenueClass = venues[k]
-            self._venues[k] = VenueClass(self._worker_pool, self._cxt, logger=self.logger, **venue_defs[k])
+            self._venues[k] = VenueClass(k, self._worker_pool, self._cxt, logger=self.logger, **venue_defs[k])
             self._venues[k].setup()
 
 
