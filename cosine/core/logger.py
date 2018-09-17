@@ -19,17 +19,19 @@ def create_logger(args):
     env = args.get("env", os.environ.get("COSINE_ENV", "DEV"))
     log_file = args.get("logfile", os.environ.get("COSINE_LOGFILE", "{0}.{1}.{2}.log".format(appname, env, os.getpid())))
     log_level = logging._nameToLevel[ args.get("loglevel", os.environ.get("COSINE_LOGLVL", "INFO")) ]
+    no_log_file = args.get("nologfile", os.environ.get("COSINE_NOLOGFILE") == "Y")
 
     # create the logger...
     _logger = logging.getLogger(appname)
     _logger.setLevel(log_level)
+    formatter = logging.Formatter('[%(asctime)s][%(thread)d][%(levelname)s]: %(message)s')
 
     # add a file handler...
-    fh = logging.FileHandler(log_file)
-    fh.setLevel(log_level)
-    formatter = logging.Formatter('[%(asctime)s][%(thread)d][%(levelname)s]: %(message)s')
-    fh.setFormatter(formatter)
-    _logger.addHandler(fh)
+    if not no_log_file:
+        fh = logging.FileHandler(log_file)
+        fh.setLevel(log_level)
+        fh.setFormatter(formatter)
+        _logger.addHandler(fh)
 
     # add a stream handler...
     sh = logging.StreamHandler()
