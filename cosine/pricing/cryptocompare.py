@@ -61,6 +61,7 @@ class CryptoCompareSocketIOFeed(CosineBaseFeed):
     def __init__(self, name, pool, cxt, logger=None, **kwargs):
         super().__init__(name, pool, cxt, logger=logger, **kwargs)
         self._socketio = None
+        self._ticker_map = {}
 
 
     def _snapshot_cache(self):
@@ -121,8 +122,9 @@ class CryptoCompareSocketIOFeed(CosineBaseFeed):
                     curr += 1
 
         instr = str(data["FROMSYMBOL"]) + "/" + str(data["TOSYMBOL"])
-        if instr in self._cache:
-            cached = self._cache[instr]
+        instrument = self._ticker_map[instr]
+        if instrument.name in self._cache:
+            cached = self._cache[instrument.name]
             cached.lastmarket = data.get("LASTMARKET", cached.lastmarket)
             cached.midprice = Decimal(data.get("PRICE", cached.lasttraded))
             cached.openhour = Decimal(data.get("OPENHOUR", cached.openhour))
@@ -163,6 +165,7 @@ class CryptoCompareSocketIOFeed(CosineBaseFeed):
             # handle any ticker remapping required for this pricing feed...
             feed_data = instrument.symbology.attrs.get(self._feed_name, {})
             ticker = feed_data.get('Ticker', instrument.asset.symbol)
+            self._ticker_map[ticker+'/'+instrument.ccy.symbol] = instrument
 
             # handle any triangulation via a base currency required...
 

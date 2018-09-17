@@ -7,6 +7,7 @@ __author__ = 'dotun rominiyi'
 
 # IMPORTS
 import random
+from decimal import Decimal
 from cosine.core.order_worker import Pos
 from .base_strategy import CosineBaseStrategy
 
@@ -52,26 +53,27 @@ class NoddyFloaterStrategy(CosineBaseStrategy):
         for instr in prices:
             worker = workers[instr.symbol]
             stg = self.find_by_instrument(instr_settings, instr=instr)
+            stg = stg if stg else {}
             px_info = prices[instr]
             mid_price = px_info.midprice
-            spread = self.Spread
-            top_spread = self.TopSpread
-            max_spread = self.MaxSpread
-            max_var = self.StepMaxVar
+            spread = Decimal(self.Spread)
+            top_spread = Decimal(self.TopSpread)
+            max_spread = Decimal(self.MaxSpread)
+            max_var = Decimal(self.StepMaxVar)
             min_step = mid_price * spread
             step = ((mid_price * top_spread) - min_step) / worker.depth
             clamp = mid_price * max_spread
-            min_vol = stg.get('MinVol', 1)
-            max_vol = stg.get('MaxVol', 10)
+            min_vol = Decimal(stg.get('MinVol', 1))
+            max_vol = Decimal(stg.get('MaxVol', 10))
             levels = range(worker.depth)
 
             instr_quotes[instr] = {
                 "bids": [Pos(
-                    price=min(mid_price + min_step + (step * i) + (step * random.random() * max_var), mid_price + clamp),
+                    price=min(mid_price + min_step + (step * i) + (step * Decimal(random.random()) * max_var), mid_price + clamp),
                     openpos=( min_vol + (max_vol * i) )
                 ) for i in levels],
                 "asks": [Pos(
-                    price=min(mid_price - min_step - (step * i) + (step * random.random() * max_var), mid_price - clamp),
+                    price=min(mid_price - min_step - (step * i) + (step * Decimal(random.random()) * max_var), mid_price - clamp),
                     openpos=( min_vol + (max_vol * i) )
                 ) for i in levels]
             }

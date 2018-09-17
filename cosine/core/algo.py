@@ -134,7 +134,7 @@ class CosineAlgo(object):
     def setup_strategy(self):
         strat = self._cfg.get("strategy", {})
         strat_name = strat.get("type")
-        strategy_def = strat.get("settings", {}).get(strat_name, {})
+        strategy_def = strat.get("settings", {}).get(strat_name, {}, split=False)
         StrategyClass = locate_strategy(strat_name)
         if not StrategyClass:
             raise ValueError("Failed to identify a valid strategy")
