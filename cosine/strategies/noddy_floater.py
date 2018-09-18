@@ -66,17 +66,20 @@ class NoddyFloaterStrategy(CosineBaseStrategy):
             min_vol = Decimal(stg.get('MinVol', 1))
             max_vol = Decimal(stg.get('MaxVol', 10))
             levels = range(worker.depth)
+            adp = Decimal('1.'+''.join(['0']*instr.asset.precision))
+            qdp = Decimal('1.'+''.join(['0']*instr.ccy.precision))
 
             instr_quotes[instr] = {
                 "bids": [Pos(
-                    price=min(mid_price + min_step + (step * i) + (step * Decimal(random.random()) * max_var), mid_price + clamp),
-                    openpos=( min_vol + (max_vol * i) )
+                    price=min(mid_price + min_step + (step * i) + (step * Decimal(random.random()) * max_var), mid_price + clamp).quantize(qdp),
+                    openpos=( min_vol + (max_vol * i) ).quantize(adp)
                 ) for i in levels],
                 "asks": [Pos(
-                    price=min(mid_price - min_step - (step * i) + (step * Decimal(random.random()) * max_var), mid_price - clamp),
-                    openpos=( min_vol + (max_vol * i) )
+                    price=max(mid_price - min_step - (step * i) + (step * Decimal(random.random()) * max_var), mid_price - clamp).quantize(qdp),
+                    openpos=( min_vol + (max_vol * i) ).quantize(adp)
                 ) for i in levels]
             }
+            self.logger.debug(f"QUOTES - {instr_quotes[instr]}")
         return instr_quotes
 
 

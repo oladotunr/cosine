@@ -179,6 +179,7 @@ class CosineOrderWorker(object):
             OfferType.Ask: balance_info.balances[self._instr.ccy.symbol],
             OfferType.Bid: balance_info.balances[self._instr.asset.symbol]
         }
+        self.logger.info(f"CosineOrderWorker - Balances: {self._balances}")
 
 
     def synchronise(self):
