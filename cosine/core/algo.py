@@ -13,7 +13,7 @@ from cosine.core.context import CosineCoreContext
 from cosine.core.proc_workers import CosineProcWorkers
 from cosine.core.order_worker import CosineOrderWorker
 from cosine.core.instrument import CosineInstrument
-from cosine.core.utils import debounce
+from cosine.core.utils import debounce, find_instrument
 from cosine.venues import collate_venues
 from cosine.pricing import collate_feeds, collate_pricers
 from cosine.strategies import locate_strategy
@@ -93,7 +93,7 @@ class CosineAlgo(object):
             venue = self._venues[k]
             instr_defs = venue.get_instrument_defs(instr_names)
             for instr in instr_names:
-                if not (instr in instr_defs): continue
+                if not (find_instrument(instr_defs, term=instr)): continue
                 self.logger.info(f"CosineAlgo -     Loading instrument: [{instr}]")
                 instrument = CosineInstrument.load(self.instr_cache, **instr_defs[instr])
                 self._cxt.instruments[instrument.name] = instrument

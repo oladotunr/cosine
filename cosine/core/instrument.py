@@ -57,6 +57,8 @@ class CosinePairInstrument(CosineTradableAsset):
         self._type = kwargs["type"]
         self._precision = kwargs["precision"]
         self._symbology = CosineSymbology(kwargs, **kwargs["symbology"])
+        self._symbology.attrs["base_name"] = self._base_name
+        self._symbology.attrs["name"] = self._name
         self._symbology.venue_id = kwargs.get('venue_id')
         if cache:
             cache[self.symbol] = self

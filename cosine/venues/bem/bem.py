@@ -135,7 +135,7 @@ class BlockExMarketsVenue(CosineBaseVenue):
 
     def get_instrument_defs(self, filtered_instr_names=None):
         return {
-            instr.name: instr for instr in self._instruments if instr.name in filtered_instr_names
+            instr.name: instr for instr in self._instruments if instr.symbology.match_in(terms=filtered_instr_names)
         } if filtered_instr_names else self._instruments
 
 

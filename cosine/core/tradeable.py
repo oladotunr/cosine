@@ -58,3 +58,11 @@ class CosineSymbology:
             if type(term) is type(v) and term == v:
                 return True
         return False
+
+
+    def match_in(self, terms):
+        for term in terms:
+            if self.match(term=term):
+                return True
+        return False
+
