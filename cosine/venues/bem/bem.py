@@ -7,6 +7,7 @@ __author__ = 'dotun rominiyi'
 
 # IMPORTS
 from cosine.core.config import FieldSet
+from cosine.core.tradeable import CosineSymbology
 from cosine.venues.base_venue import CosineBaseVenue, AsyncEvents, OrderType, OfferType
 from cosine.venues.bem.worker import BlockExMarketsSignalRWorker
 from cosine.venues.bem.types import BlockExMarketsOrder, BlockExMarketsBalanceInfo
@@ -135,7 +136,7 @@ class BlockExMarketsVenue(CosineBaseVenue):
 
     def get_instrument_defs(self, filtered_instr_names=None):
         return {
-            instr.name: instr for instr in self._instruments if instr.symbology.match_in(terms=filtered_instr_names)
+            instr.name: instr for instr in self._instruments if CosineSymbology.match_for_all(instr, terms=filtered_instr_names)
         } if filtered_instr_names else self._instruments
 
 

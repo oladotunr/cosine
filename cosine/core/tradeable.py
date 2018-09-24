@@ -66,3 +66,26 @@ class CosineSymbology:
                 return True
         return False
 
+
+    @staticmethod
+    def match_for(symdata, term):
+        if isinstance(symdata, object) and not isinstance(symdata, dict):
+            symdata = symdata.__dict__
+
+        for k, v in symdata:
+            if isinstance(v, (object, dict)):
+                if CosineSymbology.match_for(v, term=term):
+                    return True
+                else:
+                    continue
+
+            if type(term) is type(v) and term == v:
+                return True
+        return False
+
+    @staticmethod
+    def match_for_all(symdata, terms):
+        for term in terms:
+            if CosineSymbology.match(symdata, term=term):
+                return True
+        return False
