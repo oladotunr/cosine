@@ -6,10 +6,15 @@
 __author__ = 'dotun rominiyi'
 
 # IMPORTS
+import requests
+import re
+
 from decimal import Decimal
 from socketIO_client import SocketIO
 from socketIO_client.transports import get_response, XHR_PollingTransport
 from socketIO_client.parsers import get_byte, _read_packet_text, parse_packet_text
+from cosine.core.config import FieldSet
+from cosine.core.utils import debounce, epsilon_equals
 from cosine.core.instrument import CosinePairInstrument
 from .base_feed import CosineBaseFeed
 
@@ -62,6 +67,7 @@ class CryptoCompareSocketIOFeed(CosineBaseFeed):
         super().__init__(name, pool, cxt, logger=logger, **kwargs)
         self._socketio = None
         self._ticker_map = {}
+        self._triangulators = []
 
 
     def _snapshot_cache(self):
@@ -121,10 +127,24 @@ class CryptoCompareSocketIOFeed(CosineBaseFeed):
                     data[prop] = float(fields[curr])
                     curr += 1
 
+        self._cache_price_data(data=data)
+
+        # fire main tick...
+        self._events.OnTick.fire()
+
+
+    """Worker process run or inline run"""
+    def _cache_price_data(self, data):
+
         instr = str(data["FROMSYMBOL"]) + "/" + str(data["TOSYMBOL"])
         instrument = self._ticker_map[instr]
+
         if instrument.name in self._cache:
             cached = self._cache[instrument.name]
+
+            moved = cached.midprice
+            changed = Decimal(data.get("PRICE", cached.midprice))
+
             cached.lastmarket = data.get("LASTMARKET", cached.lastmarket)
             cached.midprice = Decimal(data.get("PRICE", cached.midprice))
             cached.openhour = Decimal(data.get("OPENHOUR", cached.openhour))
@@ -137,6 +157,42 @@ class CryptoCompareSocketIOFeed(CosineBaseFeed):
             cached.lasttradedvolccy = Decimal(data.get("LASTVOLUMETO", cached.lasttradedvolccy))
             cached.dayvol = Decimal(data.get("VOLUME24HOUR", cached.dayvol))
             cached.dayvolccy = Decimal(data.get("VOLUME24HOURTO", cached.dayvolccy))
+            return not epsilon_equals(moved, changed)
+
+        return False
+
+
+    """Worker process run or inline run"""
+    def _process_triangulators(self):
+
+        if len(self._triangulators) == 0:
+            return
+
+        symbols = []
+        ccys = []
+        for sym in self._triangulators:
+            symbols.append(sym.base)
+            ccys.append(sym.ccy)
+
+        # make the request to the triangulator
+        try:
+            appname = re.sub(r'\s+?', '+', self._cfg.AppName)
+            url = f"{self.triangulator}/data/pricemultifull?fsyms={','.join(symbols)}&tsyms={','.join(ccys)}&extraParams={appname}"
+            response = requests.request('GET', url)
+            prices = response.json()
+        except Exception as e:
+            self.logger.exception(e)
+            return
+
+        # update the cache and fire the tick event if the prices have moved...
+        moved = True
+        for base in prices:
+            for ccy in prices[base]:
+                pxdata = prices[base][ccy]
+                moved &= self._cache_price_data(data=pxdata)
+
+        if not moved:
+            return
 
         # fire main tick...
         self._events.OnTick.fire()
@@ -165,9 +221,14 @@ class CryptoCompareSocketIOFeed(CosineBaseFeed):
             # handle any ticker remapping required for this pricing feed...
             feed_data = instrument.symbology.attrs.get(self._feed_name, {})
             ticker = feed_data.get('Ticker', instrument.asset.symbol)
-            self._ticker_map[ticker+'/'+instrument.ccy.symbol] = instrument
+            ccy_ticker = feed_data.get('TickerCCY', instrument.ccy.symbol)
+            ticker_pair = ticker+'/'+ccy_ticker
+            self._ticker_map[ticker_pair] = instrument
 
             # handle any triangulation via a base currency required...
+            ccy_base = feed_data.get('BaseCCY')
+            if ccy_base:
+                self._triangulators.append(FieldSet(base=ccy_base, origin=ticker, ccy=ccy_ticker, instr=instrument))
 
             # now add the ticker for subscription...
             self.logger.info(f"CryptoCompareSocketIOFeed - Subscribing for instrument: {instrument.symbol} (via {ticker})")
@@ -175,6 +236,7 @@ class CryptoCompareSocketIOFeed(CosineBaseFeed):
 
         self._socketio.emit('SubAdd', {"subs": subs})
         self._socketio.on('m', self._on_sio_tick)
+        self._socketio.on('ping', debounce(wait=getattr(self, 'triangulator_throttle', 0.16))(self._on_sio_heartbeat))
 
 
     """Worker process run or inline run"""
@@ -189,4 +251,9 @@ class CryptoCompareSocketIOFeed(CosineBaseFeed):
             self._worker.enqueue_event("OnRawTick", message)
         else:
             self._on_raw_tick(message)
+
+
+    """Worker process run or inline run"""
+    def _on_sio_heartbeat(self, _):
+        self._process_triangulators()
 

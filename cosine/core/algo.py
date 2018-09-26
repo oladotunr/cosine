@@ -48,6 +48,7 @@ class CosineAlgo(object):
         self.logger.info("CosineAlgo - setup initiated")
         self._base_cfg_file = self._args.get("config", os.environ.get("COSINE_CFG", "./config.yaml"))
         self._environment = self._args.get("env", os.environ.get("COSINE_ENV", "DEV"))
+        self._appname = self._args.get("appname", os.environ.get("COSINE_APP", "cosine"))
         self._cfg_file = os.path.splitext(self._base_cfg_file)[0] + "." + self._environment.lower() + ".yaml"
 
         self._cfg = Config()
@@ -56,6 +57,7 @@ class CosineAlgo(object):
             self._cfg.load(file_path=self._cfg_file)
         self._cfg.Environment = self._environment
         self._cfg.CmdLnArgs = self._args
+        self._cfg.AppName = self._appname
         self._cfg.log_config(logger=self.logger)
 
         self._worker_pool = CosineProcWorkers(self._cfg)

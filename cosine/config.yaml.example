@@ -27,15 +27,15 @@ feeds:
         endpoint: https://streamer.cryptocompare.com
         port: 443
         framework: socket.io
+        triangulator: https://min-api.cryptocompare.com
+        triangulator_throttle: 0.4 # secs
         instruments:
             "XTN/EUR":
-                Ticker: "XRP"
-                BaseCCY: "BTC"
+                Ticker: "BTC"
             "RCC/Euro":
                 BaseCCY: "ETH"
             "ETH4/EUR":
                 Ticker: "ETH"
-                BaseCCY: "ETH"
 feed:
     Primary: cosine.pricing.cryptocompare
 
