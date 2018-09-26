@@ -69,11 +69,12 @@ class CosineSymbology:
 
     @staticmethod
     def match_for(symdata, term):
-        if isinstance(symdata, object) and not isinstance(symdata, dict):
+        if isinstance(symdata, object) and not isinstance(symdata, (str, dict, int, float, complex)):
             symdata = symdata.__dict__
 
-        for k, v in symdata:
-            if isinstance(v, (object, dict)):
+        for k, v in symdata.items():
+            if k in ['asset', 'quote_ccy']: continue
+            if isinstance(v, (object, dict)) and not isinstance(v, (str, int, float, complex)):
                 if CosineSymbology.match_for(v, term=term):
                     return True
                 else:
@@ -86,6 +87,6 @@ class CosineSymbology:
     @staticmethod
     def match_for_all(symdata, terms):
         for term in terms:
-            if CosineSymbology.match(symdata, term=term):
+            if CosineSymbology.match_for(symdata, term=term):
                 return True
         return False

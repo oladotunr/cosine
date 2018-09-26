@@ -93,9 +93,10 @@ class CosineAlgo(object):
             venue = self._venues[k]
             instr_defs = venue.get_instrument_defs(instr_names)
             for instr in instr_names:
-                if not (find_instrument(instr_defs, term=instr)): continue
+                instr_def = find_instrument(instr_defs, term=instr)
+                if not instr_def: continue
                 self.logger.info(f"CosineAlgo -     Loading instrument: [{instr}]")
-                instrument = CosineInstrument.load(self.instr_cache, **instr_defs[instr])
+                instrument = CosineInstrument.load(self.instr_cache, **instr_def)
                 self._cxt.instruments[instrument.name] = instrument
                 order_worker = CosineOrderWorker(self._cfg.orders.ActiveDepth, instrument, venue, logger=self.logger)
                 self._cxt.orders[k][instrument.symbol] = order_worker

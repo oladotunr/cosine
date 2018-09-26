@@ -10,6 +10,7 @@ import importlib
 
 from sys import float_info as flt
 from threading import Timer
+from cosine.core.tradeable import CosineSymbology
 
 
 # FUNCTIONS
@@ -20,13 +21,17 @@ def epsilon_equals(x, y):
 def find_instrument(instruments, term):
     instruments = (instruments.values() if isinstance(instruments, dict) else instruments)
     for instr in instruments:
-        if instr.symbology.match(term):
+        if isinstance(instr.symbology, dict) and CosineSymbology.match_for(instr.symbology, term=term):
+            return instr
+        elif instr.symbology.match(term):
             return instr
     return None
 
 def find_by_instrument(instr_data, instr):
     for term in instr_data:
-        if instr.symbology.match(term):
+        if isinstance(instr.symbology, dict) and CosineSymbology.match_for(instr.symbology, term=term):
+            return instr
+        elif instr.symbology.match(term):
             return instr_data[term]
     return None
 

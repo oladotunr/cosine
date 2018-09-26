@@ -6,6 +6,8 @@
 __author__ = 'dotun rominiyi'
 
 # IMPORTS
+from bs4 import BeautifulSoup
+from json.decoder import JSONDecodeError
 from cosine.core.config import FieldSet
 from cosine.core.tradeable import CosineSymbology
 from cosine.venues.base_venue import CosineBaseVenue, AsyncEvents, OrderType, OfferType
@@ -13,12 +15,46 @@ from cosine.venues.bem.worker import BlockExMarketsSignalRWorker
 from cosine.venues.bem.types import BlockExMarketsOrder, BlockExMarketsBalanceInfo
 from blockex.tradeapi import interface
 from blockex.tradeapi.tradeapi import BlockExTradeApi
-from blockex.tradeapi.helper import message_raiser, get_error_message
+import blockex.tradeapi.helper as helper
 
 
 # MODULE FUNCTIONS
 API_GET_ACTIVE_CCYS = "api/lookups/currencies?ApiID={0}"
 API_GET_QUOTE_CCYS = "api/lookups/quotecurrencies?ApiID={0}"
+
+
+def get_json_error_message(response):
+    response_json = response.json()
+    message = response_json.get('error') or response_json.get('message')
+    message = message if message else ''
+    return message
+
+
+def get_html_error_message(response):
+    response_html = BeautifulSoup(response.text)
+    tag = response_html.find('div', attrs={"id": "header"})
+    if not tag: return ''
+    tag = tag.find("h1")
+    if not tag or not ("Error" in tag): return ''
+    message = response_html.html.body.find("h3").string
+    message = message if message else ''
+    return message
+
+
+def get_error_message(response):
+    """Gets an error message for a response.
+    Here we deviate from the base function to better account for HTML error responses,
+    usually where the auth request fails.
+    """
+    try:
+        message = get_json_error_message(response=response)
+    except JSONDecodeError:
+        try: message = get_html_error_message(response=response)
+        except: message = response.reason if hasattr(response, 'reason') else str(response)
+    return ' Message: {message}'.format(message=message)
+
+
+helper.get_error_message = get_error_message
 
 
 def get_active_currencies(self):
@@ -27,7 +63,7 @@ def get_active_currencies(self):
         ccys = response.json()
         return ccys
 
-    message_raiser('Failed to get the active currencies. {error_message}',
+    helper.message_raiser('Failed to get the active currencies. {error_message}',
                    error_message=get_error_message(response))
 
 def get_quote_currencies(self):
@@ -36,7 +72,7 @@ def get_quote_currencies(self):
         ccys = response.json()
         return ccys
 
-    message_raiser('Failed to get the quote currencies. {error_message}',
+    helper.message_raiser('Failed to get the quote currencies. {error_message}',
                    error_message=get_error_message(response))
 
 
@@ -157,6 +193,7 @@ class BlockExMarketsVenue(CosineBaseVenue):
             precision=self._currencies[bem_instr["quoteCurrencyID"]].precision,
             symbology={
                 "symbol": bem_instr["name"],
+                "iso": self._currencies[bem_instr["baseCurrencyID"]]["symbol"] + "/" + self._currencies[bem_instr["quoteCurrencyID"]]["symbol"],
                 "label": self._currencies[bem_instr["baseCurrencyID"]].symbology["label"],
                 "venue_asset_id": bem_instr["baseCurrencyID"],
                 "venue_ccy_id": bem_instr["quoteCurrencyID"],
