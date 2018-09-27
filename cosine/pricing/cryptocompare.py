@@ -14,7 +14,7 @@ from socketIO_client import SocketIO
 from socketIO_client.transports import get_response, XHR_PollingTransport
 from socketIO_client.parsers import get_byte, _read_packet_text, parse_packet_text
 from cosine.core.config import FieldSet
-from cosine.core.utils import debounce, epsilon_equals
+from cosine.core.utils import epsilon_equals
 from cosine.core.instrument import CosinePairInstrument
 from .base_feed import CosineBaseFeed
 
@@ -67,7 +67,7 @@ class CryptoCompareSocketIOFeed(CosineBaseFeed):
         super().__init__(name, pool, cxt, logger=logger, **kwargs)
         self._socketio = None
         self._ticker_map = {}
-        self._triangulators = []
+        self._triangulators = {}
 
 
     def _snapshot_cache(self):
@@ -127,6 +127,13 @@ class CryptoCompareSocketIOFeed(CosineBaseFeed):
                     data[prop] = float(fields[curr])
                     curr += 1
 
+        # if it's a triangulated pair then process it separately...
+        ticker_pair = str(data["FROMSYMBOL"]) + "/" + str(data["TOSYMBOL"])
+        triangulator = self._triangulators.get(ticker_pair)
+        if triangulator:
+            return self._process_triangulator(trisym=triangulator, subdata=data)
+
+        # if it's a non-triangulated pair then just cache it as is...
         self._cache_price_data(data=data)
 
         # fire main tick...
@@ -146,7 +153,7 @@ class CryptoCompareSocketIOFeed(CosineBaseFeed):
             changed = Decimal(data.get("PRICE", cached.midprice))
 
             cached.lastmarket = data.get("LASTMARKET", cached.lastmarket)
-            cached.midprice = Decimal(data.get("PRICE", cached.midprice))
+            cached.midprice = changed
             cached.openhour = Decimal(data.get("OPENHOUR", cached.openhour))
             cached.highhour = Decimal(data.get("HIGHHOUR", cached.highhour))
             cached.lowhour = Decimal(data.get("LOWHOUR", cached.lowhour))
@@ -163,33 +170,39 @@ class CryptoCompareSocketIOFeed(CosineBaseFeed):
 
 
     """Worker process run or inline run"""
-    def _process_triangulators(self):
-
-        if len(self._triangulators) == 0:
-            return
-
-        symbols = []
-        ccys = []
-        for sym in self._triangulators:
-            symbols.append(sym.base)
-            ccys.append(sym.ccy)
+    def _process_triangulator(self, trisym, subdata):
 
         # make the request to the triangulator
         try:
             appname = re.sub(r'\s+?', '+', self._cfg.AppName)
-            url = f"{self.triangulator}/data/pricemultifull?fsyms={','.join(symbols)}&tsyms={','.join(ccys)}&extraParams={appname}"
+            url = f"{self.triangulator}/data/pricemultifull?fsyms={trisym.base}&tsyms={trisym.ccy}&extraParams={appname}"
             response = requests.request('GET', url)
-            prices = response.json()
+            prices = response.json()["RAW"]
         except Exception as e:
             self.logger.exception(e)
             return
 
+        # triangulate the pricing...
+        pxdata = prices[trisym.base][trisym.ccy]
+        def triangulate_px(sub, tri, px):
+            if px in sub and px in tri:
+                sub[px] = Decimal(sub[px]) * Decimal(tri[px])
+
+        triangulate_px(subdata, pxdata, "PRICE")
+        triangulate_px(subdata, pxdata, "OPENHOUR")
+        triangulate_px(subdata, pxdata, "HIGHHOUR")
+        triangulate_px(subdata, pxdata, "LOWHOUR")
+        triangulate_px(subdata, pxdata, "OPEN24HOUR")
+        triangulate_px(subdata, pxdata, "HIGH24HOUR")
+        triangulate_px(subdata, pxdata, "LOW24HOUR")
+        triangulate_px(subdata, pxdata, "LASTVOLUME")
+        triangulate_px(subdata, pxdata, "LASTVOLUMETO")
+        triangulate_px(subdata, pxdata, "VOLUME24HOUR")
+        triangulate_px(subdata, pxdata, "VOLUME24HOURTO")
+
         # update the cache and fire the tick event if the prices have moved...
         moved = True
-        for base in prices:
-            for ccy in prices[base]:
-                pxdata = prices[base][ccy]
-                moved &= self._cache_price_data(data=pxdata)
+        moved &= self._cache_price_data(data=subdata)
 
         if not moved:
             return
@@ -228,15 +241,16 @@ class CryptoCompareSocketIOFeed(CosineBaseFeed):
             # handle any triangulation via a base currency required...
             ccy_base = feed_data.get('BaseCCY')
             if ccy_base:
-                self._triangulators.append(FieldSet(base=ccy_base, origin=ticker, ccy=ccy_ticker, instr=instrument))
+                ticker_base_pair = ticker + '/' + ccy_base
+                self._triangulators[ticker_base_pair] = FieldSet(base=ccy_base, origin=ticker, ccy=ccy_ticker, instr=instrument)
+                ccy_ticker = ccy_base
 
             # now add the ticker for subscription...
-            self.logger.info(f"CryptoCompareSocketIOFeed - Subscribing for instrument: {instrument.symbol} (via {ticker})")
-            subs.append('5~CCCAGG~{0}~{1}'.format(ticker, instrument.ccy.symbol))
+            self.logger.info(f"CryptoCompareSocketIOFeed - Subscribing for instrument: {instrument.symbol} (via {ticker}/{ccy_ticker})")
+            subs.append('5~CCCAGG~{0}~{1}'.format(ticker, ccy_ticker))
 
         self._socketio.emit('SubAdd', {"subs": subs})
         self._socketio.on('m', self._on_sio_tick)
-        self._socketio.on('ping', debounce(wait=getattr(self, 'triangulator_throttle', 0.16))(self._on_sio_heartbeat))
 
 
     """Worker process run or inline run"""
@@ -251,9 +265,4 @@ class CryptoCompareSocketIOFeed(CosineBaseFeed):
             self._worker.enqueue_event("OnRawTick", message)
         else:
             self._on_raw_tick(message)
-
-
-    """Worker process run or inline run"""
-    def _on_sio_heartbeat(self, _):
-        self._process_triangulators()
 
