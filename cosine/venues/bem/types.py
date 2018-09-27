@@ -151,7 +151,7 @@ class BlockExMarketsOrder(CosineOrder):
         self._msg['quantity'] = Decimal(self._msg['quantity'])
         self._msg['offerType'] = OfferType(self._msg['offerType'])
         self._msg['status'] = OrderStatus(self._msg['status'])
-        self._msg['dateCreated'] = datetime.strptime(self._msg['dateCreated'][:31], format="%Y-%m-%dT%H:%M:%S.%f")
+        self._msg['dateCreated'] = datetime.strptime(self._msg['dateCreated'][:26], "%Y-%m-%dT%H:%M:%S.%f")
 
     @property
     def id(self):

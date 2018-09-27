@@ -199,6 +199,7 @@ class CryptoCompareSocketIOFeed(CosineBaseFeed):
         triangulate_px(subdata, pxdata, "LASTVOLUMETO")
         triangulate_px(subdata, pxdata, "VOLUME24HOUR")
         triangulate_px(subdata, pxdata, "VOLUME24HOURTO")
+        subdata["TOSYMBOL"] = pxdata["TOSYMBOL"]
 
         # update the cache and fire the tick event if the prices have moved...
         moved = True
