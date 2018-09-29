@@ -6,6 +6,7 @@
 __author__ = 'dotun rominiyi'
 
 # IMPORTS
+import signal
 import importlib
 
 from sys import float_info as flt
@@ -96,3 +97,17 @@ class CosineEventSlot(object):
     def fire(self, *args, **kwargs):
         for handler in self._handlers:
             handler(*args, **kwargs)
+
+
+class CosineSignalHandler(object):
+
+    def __init__(self):
+        signal.signal(signal.SIGINT, self._handle_sig_int)
+        signal.signal(signal.SIGTERM, self._handle_sig_term)
+
+    def _handle_sig_int(self, sig, frame):
+        pass
+
+    def _handle_sig_term(self, sig, frame):
+        pass
+

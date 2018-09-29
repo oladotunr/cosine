@@ -7,13 +7,14 @@ __author__ = 'dotun rominiyi'
 
 # IMPORTS
 import os
+import sys
 
 from cosine.core.config import Config, FieldSet
 from cosine.core.context import CosineCoreContext
 from cosine.core.proc_workers import CosineProcWorkers
 from cosine.core.order_worker import CosineOrderWorker
 from cosine.core.instrument import CosineInstrument
-from cosine.core.utils import debounce, find_instrument
+from cosine.core.utils import debounce, find_instrument, CosineSignalHandler
 from cosine.venues import collate_venues
 from cosine.pricing import collate_feeds, collate_pricers
 from cosine.strategies import locate_strategy
@@ -21,9 +22,10 @@ from cosine.core.logger import create_logger
 
 
 # MODULE CLASSES
-class CosineAlgo(object):
+class CosineAlgo(CosineSignalHandler):
 
     def __init__(self, cmdline_args, logger=None):
+        super().__init__()
         self._cfg = None
         self._cxt = None
         self._worker_pool = None
@@ -147,6 +149,7 @@ class CosineAlgo(object):
 
 
     def teardown(self):
+        self.logger.debug("CosineAlgo - ** Teardown **")
         self._cxt.strategy.teardown()
         for k in self._cxt.pricers:
             self._cxt.pricers[k].teardown()
@@ -162,6 +165,7 @@ class CosineAlgo(object):
             self._venues[k].teardown()
 
         self.worker_pool.join(timeout=self._cfg.system.get("JoinTimeout"))
+        self.logger.debug("CosineAlgo - ** Clean up complete **")
 
 
     def run(self):
@@ -216,6 +220,16 @@ class CosineAlgo(object):
 
         # update the strategy...
         self._cxt.strategy.update()
+
+
+    def _handle_sig_int(self, sig, frame):
+        self.teardown()
+        sys.exit(0)
+
+
+    def _handle_sig_term(self, sig, frame):
+        self.teardown()
+        sys.exit(0)
 
 
     @property
