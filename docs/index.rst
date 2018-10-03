@@ -23,11 +23,10 @@ Contents
    overview
    configuration
    pricingfeeds
+   venues
    pricers
    strategies
    noddyfloater
-   venues
-   processworkers
    troubleshooting
 
 

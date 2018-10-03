@@ -1,4 +1,0 @@
-Process Workers
-===============
-
-.. contents:: :local:
