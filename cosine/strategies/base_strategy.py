@@ -40,3 +40,25 @@ class CosineBaseStrategy(object):
     def find_by_instrument(self, instr_data, instr):
         return find_by_instrument(instr_data, instr=instr)
 
+
+    def _get_venue_orderworkers(self, venue_module):
+        return self._cxt.orders[venue_module]
+
+    def _get_instruments_for_orderworkers(self, oworkers):
+        return map(lambda wrkr: wrkr.instrument, oworkers.values())
+
+    def _get_instruments_for_venue(self, venue_module):
+        bem_workers = self._get_venue_orderworkers(venue_module)
+        return map(lambda wrkr: wrkr.instrument, bem_workers.values())
+
+    def _capture_feed_prices(self, feed_module, instruments):
+        feed = self._cxt.feeds[feed_module]
+        return feed.capture_latest_prices(instruments=instruments)
+
+    def _run_pipelined_pricers(self, prices, cls=None):
+        cls = cls if cls is not None else self.__name__
+        for p in self._cxt.pricer_seq:
+            self.logger.debug(f"{cls} - calc pricing: [{p}]")
+            prices = self._cxt.pricers[p].generate_theo_prices(instrument_prices=prices)
+        return prices
+

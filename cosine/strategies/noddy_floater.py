@@ -23,18 +23,15 @@ class NoddyFloaterStrategy(CosineBaseStrategy):
         self.logger.debug("NoddyFloaterStrategy - ** update **")
 
         # pull instruments...
-        bem_workers = self._cxt.orders['cosine.venues.bem']
-        instruments = map(lambda wrkr: wrkr.instrument, bem_workers.values())
+        bem_workers = self._get_venue_orderworkers('cosine.venues.bem')
+        instruments = self._get_instruments_for_orderworkers(bem_workers)
 
         # pull prices for instruments...
         self.logger.debug("NoddyFloaterStrategy - source instrument prices from feed cache...")
-        feed = self._cxt.feeds['cosine.pricing.cryptocompare']
-        prices = feed.capture_latest_prices(instruments=instruments)
+        prices = self._capture_feed_prices('cosine.pricing.cryptocompare', instruments=instruments)
 
         # massage pricing...
-        for p in self._cxt.pricer_seq:
-            self.logger.debug(f"NoddyFloaterStrategy - calc pricing: [{p}]")
-            prices = self._cxt.pricers[p].generate_theo_prices(instrument_prices=prices)
+        prices = self._run_pipelined_pricers(prices, "NoddyFloaterStrategy")
 
         # update the order quotes...
         self.logger.debug("NoddyFloaterStrategy - updating quotes...")

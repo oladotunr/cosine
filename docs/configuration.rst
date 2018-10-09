@@ -23,24 +23,24 @@ Here's the full set of available configurations (complete with group headings pe
 
    # all system-level configurations
    system:
-       EventLoop: <val>                         # the event loop configuration mode, "feed" or "timer"
-       EventLoopThrottle: <val>                 # event loop rate limit in seconds
-       network:                                 # general network level configuration
-           ssl:                                 # SSL related configuration
-               CertFile: <val>                  # [optional] path to the SSL certificate authority cert file
+       EventLoop: <val>                             # the event loop configuration mode, "feed" or "timer"
+       EventLoopThrottle: <val>                     # event loop rate limit in seconds
+       network:                                     # general network level configuration
+           ssl:                                     # SSL related configuration
+               CertFile: <val>                      # [optional] path to the SSL certificate authority cert file
 
    # general order worker related configurations
    orders:
-       ActiveDepth: <val>                       # active depth on each side of book respectively (bid and ask)
+       ActiveDepth: <val>                           # active depth on each side of book respectively (bid and ask)
 
    # set of configured venues (with their contextual configurations) to initialise for use with the order workers
    venues:
-       cosine.venues.bem:                       # [optional] the fully qualified module path of the BlockExMarketsVenue (CosineBaseVenue derivative) class to load + configure
-           Username: <val>                      # [venue-specific] the username of the trader account to authenticate against
-           Password: <val>                      # [venue-specific] the password of the trader account to authenticate against
-           APIDomain: <val>                     # [venue-specific] the top-level domain of the BEM venue
-           APIID: <val>                         # [venue-specific] the dedicated APIID for the BEM venue
-           ConnectSignalR: <val>                # [venue-specific] tells BEM whether to subscribe to the async signalR feed or not, "true" or "false"
+       cosine.venues.bem:                           # [optional] the fully qualified module path of the BlockExMarketsVenue (CosineBaseVenue derivative) class to load + configure
+           Username: <val>                          # [venue-specific] the username of the trader account to authenticate against
+           Password: <val>                          # [venue-specific] the password of the trader account to authenticate against
+           APIDomain: <val>                         # [venue-specific] the top-level domain of the BEM venue
+           APIID: <val>                             # [venue-specific] the dedicated APIID for the BEM venue
+           ConnectSignalR: <val>                    # [venue-specific] tells BEM whether to subscribe to the async signalR feed or not, "true" or "false"
 
    # the set of configured instruments to work markets in. Order workers will be created against each of these on the relevant venue(s)
    instruments:
@@ -50,44 +50,42 @@ Here's the full set of available configurations (complete with group headings pe
 
    # the set of configured pricing feeds to connect and subscribe to for market data consumption
    feeds:
-       cosine.pricing.cryptocompare:            # [optional] the fully qualified module path of the CryptoCompareSocketIOFeed (CosineBaseFeed derivative) class to load + configure
-           type: <val>                          # [feed-specific] the type of connection ("stream" only for this feed)
-           endpoint: <val>                      # [feed-specific] the websockets/socket.io endpoint hostname to connect to
-           port: <val>                          # [feed-specific] the port to connect to
-           framework: <val>                     # [feed-specific] the framework for connectivity
-           triangulator: <val>                  # [feed-specific] the REST endpoint to use to pull triangulation info for implying pricing for pairs with no direct subscription
-           triangulator_throttle: <val>         # [feed-specific] the rate limit for running triangulation queries in seconds
-           instruments:                         # the set of instruments to subscribe to
+       cosine.pricing.cryptocompare:                # [optional] the fully qualified module path of the CryptoCompareSocketIOFeed (CosineBaseFeed derivative) class to load + configure
+           type: <val>                              # [feed-specific] the type of connection ("stream" only for this feed)
+           endpoint: <val>                          # [feed-specific] the websockets/socket.io endpoint hostname to connect to
+           port: <val>                              # [feed-specific] the port to connect to
+           framework: <val>                         # [feed-specific] the framework for connectivity
+           triangulator: <val>                      # [feed-specific] the REST endpoint to use to pull triangulation info for implying pricing for pairs with no direct subscription
+           triangulator_throttle: <val>             # [feed-specific] the rate limit for running triangulation queries in seconds
+           instruments:                             # the set of instruments to subscribe to
                "XTN/EUR":
-                   Ticker: "BTC"                # ticker re-mapping for the base/top-level currency
-               "RCC/EUR":
-                   BaseCCY: "ETH"               # [optional] forces the feed to subscribe to RCC/ETH and then run triangulation on each price tick to calculate the RCC/EUR price
-               "ETH4/EUR":
-                   Ticker: "ETH"
+                   Ticker: <val>                    # ticker re-mapping for the base/top-level currency, e.g. "BTC"
+                   BaseCCY: <val>                   # [optional] forces the feed to e.g. if the value is "ETH" for an RCC/EUR pair, subscribe to RCC/ETH and then run triangulation on each price tick to calculate the RCC/EUR price
+               "RCC/EUR": {}
+               "ETH4/EUR": {}
+
+   # [optional] the configured primary feed, such that when "system.EventLoop: feed", this CosineBaseFeed derivative will be configured to drive the main event loop
    feed:
-       Primary: cosine.pricing.cryptocompare
+       Primary: cosine.pricing.cryptocompare        # primary feed to drive the main event loop
 
+   # the set of configured pricers to pipeline for processing pricing data. Can be used to consume raw price feed data and generate theoretical pricing or other price-derived values
    pricers:
-       Default: cosine.pricing.pricers.nullpricer
-       settings:
-           cosine.pricing.pricers.nullpricer:
-               nop: nop
+       Default: cosine.pricing.pricers.nullpricer   # a comma-separated list of pricer modules to load and pipeline in-order for pricing generation
+       settings:                                    # the set of pricer-specific configurations
+           cosine.pricing.pricers.nullpricer: {}    # [pricer-specific] pricer configuration
 
+   # the configuration for the configured strategy to run
    strategy:
-       type: cosine.strategies.noddy_floater
-       settings:
-           cosine.strategies.noddy_floater:
-               Spread: 0.20
-               MaxSpread: 0.5
-               instrument_settings:
+       type: cosine.strategies.noddy_floater        # the strategy module to load and run under the algo. This contains the core business logic of the algo
+       settings:                                    # the set of strategy-specific settings configurations
+           cosine.strategies.noddy_floater:         # [optional] the noddy_floater strategy settings
+               Spread: <val>                        # [strategy-specific] the % spread to maintain around the spot mid-price, e.g. 0.20
+               MaxSpread: <val>                     # [strategy-specific] the maximum % spread based on dynamic widening of quotes, e.g. 0.50
+               instrument_settings:                 # [strategy-specific] instrument specific strategy settings
                    "XTN/EUR":
-                       MinVol: 5
-                       MaxVol: 10
-                   "RCC/EUR":
-                       MinVol: 5
-                       MaxVol: 10
-                   "ETH4/EUR":
-                       MinVol: 5
-                       MaxVol: 10
+                       MinVol: <val>                # [strategy-specific] minimum volume per quoted price step
+                       MaxVol: <val>                # [strategy-specific] maximum volume per quoted price step
+                   "RCC/EUR": {}
+                   "ETH4/EUR": {}
 
 See above.

@@ -6,6 +6,9 @@
 Cosine
 ======
 
+* `GitHub repository <https://github.com/oladotunr/cosine>`_
+* `GitHub example repository <https://github.com/oladotunr/cosine-algo>`_
+
 Cosine is a crypto exchange trading algo framework. It provides a modular framework for implementing custom algorithmic
 trading strategies, across either single or multiple execution venues, with support for multiple concurrent pricing
 feeds from a variety of market pricing sources.

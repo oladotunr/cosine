@@ -32,6 +32,7 @@ class CosineAlgo(CosineSignalHandler):
         self._venues = None
         self._base_cfg_file = None
         self._environment = None
+        self._appname = None
         self._cfg_file = None
         self.logger = None
         self._args = cmdline_args

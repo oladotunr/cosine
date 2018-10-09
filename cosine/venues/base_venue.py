@@ -177,7 +177,7 @@ class CosineBaseVenue(object):
         pass
 
     def on(self, event_name, handler):
-        raise NotImplementedError()
+        pass
 
     def get_instrument_defs(self):
         raise NotImplementedError()
