@@ -4,6 +4,7 @@ cosine/__init__.py
 cosine/config.yaml.example
 cosine/core/__init__.py
 cosine/core/algo.py
+cosine/core/args.py
 cosine/core/config.py
 cosine/core/context.py
 cosine/core/instrument.py
@@ -21,6 +22,7 @@ cosine/pricing/pricers/base_pricer.py
 cosine/pricing/pricers/nullpricer.py
 cosine/strategies/__init__.py
 cosine/strategies/base_strategy.py
+cosine/strategies/multi_strategy.py
 cosine/strategies/noddy_floater.py
 cosine/venues/__init__.py
 cosine/venues/base_venue.py
