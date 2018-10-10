@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="cosine-crypto",
-    version="0.2.47",
+    version="0.2.48",
     author="Oladotun Rominiyi",
     author_email="dotun@voxex.io",
     description="A modular open source cryptocurrency trading algo framework.",

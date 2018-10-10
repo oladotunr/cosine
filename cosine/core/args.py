@@ -12,7 +12,7 @@ import argparse
 # MODULE CLASSES
 class CosineCmdLineArgs(object):
 
-    def __init__(self, appdesc, capture_args):
+    def __init__(self, appdesc, capture_args=None):
 
         # create the parser and add capturing for required arguments...
         self.parser = argparse.ArgumentParser(description=appdesc)
