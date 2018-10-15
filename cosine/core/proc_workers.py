@@ -44,9 +44,11 @@ class CosineProcEventMgr(object):
         self._events = Queue()
         self._slots = FieldSet()
 
-    def process_events(self):
+    def process_events(self, process_events=None):
         # consume all the available events...
         evts = []
+        if process_events is None:
+            process_events = lambda events, handlers: events
         try:
             while not self._events.empty():
                 evts.append( self._events.get_nowait() )
@@ -54,6 +56,7 @@ class CosineProcEventMgr(object):
             pass
 
         # process any event handlers registered for these events...
+        evts = process_events(evts, self.events)
         for evt in evts:
             (name, data) = evt
             if name in self.events:

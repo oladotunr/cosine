@@ -63,26 +63,8 @@ setattr(XHR_PollingTransport, 'recv_packet', new_recv_packet)
 # MODULE CLASSES
 class CryptoCompareSocketIOFeed(CosineBaseFeed):
 
-    def __init__(self, name, pool, cxt, logger=None, **kwargs):
-        super().__init__(name, pool, cxt, logger=logger, **kwargs)
-        self._socketio = None
-        self._ticker_map = {}
-        self._triangulators = {}
-
-
-    def _snapshot_cache(self):
-        # nothing to do since we'll auto-snapshot on subscription to the websockets feed...
-        pass
-
-
-    def _setup_events(self, worker):
-        worker.events.OnRawTick += self._on_raw_tick
-
-
-    def _on_raw_tick(self, msg):
-        # decode & cache pricing...
-        FIELDS = {
-            'TYPE': 0x0
+    FIELDS = {
+        'TYPE': 0x0
         , 'MARKET': 0x0
         , 'FROMSYMBOL': 0x0
         , 'TOSYMBOL': 0x0
@@ -106,26 +88,70 @@ class CryptoCompareSocketIOFeed(CosineBaseFeed):
         , 'HIGH24HOUR': 0x10000
         , 'LOW24HOUR': 0x20000
         , 'LASTMARKET': 0x40000
-        }
+    }
+
+    def __init__(self, name, pool, cxt, logger=None, **kwargs):
+        super().__init__(name, pool, cxt, logger=logger, **kwargs)
+        self._socketio = None
+        self._ticker_map = {}
+        self._triangulators = {}
+
+
+    def _snapshot_cache(self):
+        # nothing to do since we'll auto-snapshot on subscription to the websockets feed...
+        pass
+
+
+    def _setup_events(self, worker):
+        worker.events.OnRawTick += self._on_raw_tick
+
+    def _process_received_events(self, events, slots):
+        # conflate the events to just process for the latest pricing ticks per product...
+        evt_group = {}
+        icount = len(events)
+        for evt in events:
+            (name, msg) = evt
+            data = self._parse_msg_event(msg)
+            if not data: continue
+            tkr = str(data["FROMSYMBOL"]) + "/" + str(data["TOSYMBOL"])
+            if tkr not in evt_group:
+                evt_group[tkr] = evt
+
+        events = [(n, m) for (n, m) in evt_group.items()]
+        ecount = len(events)
+        if icount != ecount:
+            self.logger.info("CryptoCompareSocketIOFeed - Conflated events: {0} / {1}".format(icount, ecount))
+        return events
+
+
+    def _parse_msg_event(self, msg):
+        # decode msg...
         fields = msg.split('~')
         try:
             mask = int(fields[-1], 16)
         except:
             self.logger.warn("Failed to decode price feed data: {0}".format(msg))
-            return
+            return None
+
         fields = fields[:-1]
         curr = 0
         data = {}
-        for prop in FIELDS:
-            if FIELDS[prop] == 0:
+        for prop in self.FIELDS:
+            if self.FIELDS[prop] == 0:
                 data[prop] = fields[curr]
                 curr += 1
-            elif mask & FIELDS[prop]:
+            elif mask & self.FIELDS[prop]:
                 if prop == 'LASTMARKET':
                     data[prop] = fields[curr]
                 else:
                     data[prop] = float(fields[curr])
                     curr += 1
+        return data
+
+
+    def _on_raw_tick(self, msg):
+        # decode & cache pricing...
+        data = self._parse_msg_event(msg)
 
         # if it's a triangulated pair then process it separately...
         ticker_pair = str(data["FROMSYMBOL"]) + "/" + str(data["TOSYMBOL"])

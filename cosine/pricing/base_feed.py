@@ -56,7 +56,7 @@ class CosineBaseFeed(object):
 
     def update(self):
         if self._worker:
-            self._worker.process_events()
+            self._worker.process_events(process_events=self._process_received_events)
 
 
     """Worker process run or inline run"""
@@ -112,6 +112,9 @@ class CosineBaseFeed(object):
 
     def _setup_events(self, worker):
         pass
+
+    def _process_received_events(self, events, slots):
+        return events
 
 
     @property
